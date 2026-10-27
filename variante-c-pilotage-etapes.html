@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atopile Studio — Pilotage par étapes</title>
+<!-- Google Fonts: Geist & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration Verbatim -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-fixed-variant": "#6e3900",
+            "on-primary": "#003824",
+            "outline": "#86948a",
+            "on-surface-variant": "#bbcabf",
+            "surface-container-lowest": "#0b0f12",
+            "primary-fixed-dim": "#4edea3",
+            "on-tertiary": "#68000a",
+            "on-secondary-fixed": "#2f1500",
+            "secondary-fixed-dim": "#ffb77d",
+            "error": "#ffb4ab",
+            "surface-tint": "#4edea3",
+            "inverse-primary": "#006c49",
+            "primary": "#4edea3",
+            "background": "#101417",
+            "secondary-container": "#d97707",
+            "on-surface": "#e0e3e7",
+            "on-secondary-container": "#432100",
+            "on-secondary": "#4d2600",
+            "on-primary-fixed-variant": "#005236",
+            "secondary-fixed": "#ffdcc3",
+            "surface": "#101417",
+            "tertiary-fixed-dim": "#ffb3ad",
+            "surface-container": "#1c2023",
+            "primary-container": "#10b981",
+            "on-tertiary-container": "#79000e",
+            "inverse-on-surface": "#2d3134",
+            "on-tertiary-fixed": "#410004",
+            "on-error-container": "#ffdad6",
+            "secondary": "#ffb77d",
+            "surface-dim": "#101417",
+            "surface-bright": "#363a3d",
+            "outline-variant": "#3c4a42",
+            "surface-container-highest": "#313539",
+            "surface-container-high": "#262a2e",
+            "on-primary-fixed": "#002113",
+            "tertiary-fixed": "#ffdad7",
+            "on-error": "#690005",
+            "tertiary": "#ffb3ad",
+            "tertiary-container": "#ff7a73",
+            "on-tertiary-fixed-variant": "#930013",
+            "on-background": "#e0e3e7",
+            "error-container": "#93000a",
+            "surface-container-low": "#181c1f",
+            "on-primary-container": "#00422b",
+            "inverse-surface": "#e0e3e7",
+            "surface-variant": "#313539",
+            "primary-fixed": "#6ffbbe"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "space-xl": "1.5rem",
+            "space-sm": "0.375rem",
+            "space-lg": "1rem",
+            "space-md": "0.75rem",
+            "margin": "1rem",
+            "gutter": "0.75rem"
+          },
+          "fontFamily": {
+            "label-md": ["JetBrains Mono"],
+            "headline-md": ["Geist"],
+            "code-sm": ["JetBrains Mono"],
+            "code-md": ["JetBrains Mono"],
+            "body-sm": ["Geist"],
+            "headline-sm": ["Geist"],
+            "body-md": ["Geist"],
+            "label-sm": ["JetBrains Mono"],
+            "body-lg": ["Geist"],
+            "headline-lg": ["Geist"]
+          },
+          "fontSize": {
+            "label-md": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-md": ["1.25rem", { "lineHeight": "1.75rem", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "code-sm": ["0.6875rem", { "lineHeight": "1rem", "letterSpacing": "0em", "fontWeight": "400" }],
+            "code-md": ["0.8125rem", { "lineHeight": "1.25rem", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "body-sm": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["1rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-md": ["0.875rem", { "lineHeight": "1.25rem", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-sm": ["0.625rem", { "lineHeight": "0.875rem", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "body-lg": ["0.9375rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-lg": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 16px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+    }
+    /* Technical scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0f12;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1c2023;
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #313539;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md text-body-md antialiased h-screen w-screen overflow-hidden flex flex-col select-none">
+<!-- ========================================================================= -->
+<!-- 1. TOP APP BAR (Shared Component Execution: TopNavBar)                    -->
+<!-- ========================================================================= -->
+<header class="flex justify-between items-center w-full px-space-md h-10 select-none bg-surface-container-lowest border-b border-outline-variant shrink-0 z-30">
+<!-- Left: Brand + Engine Status + Project Breadcrumb -->
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm font-semibold tracking-tight text-on-surface">ATO STUDIO</span>
+<!-- Local Engine Badge -->
+<span class="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant font-code-sm text-code-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span>Moteur v1.8.2 local (port 8080 : actif)</span>
+</span>
+</div>
+<div class="h-3.5 w-px bg-outline-variant"></div>
+<!-- Breadcrumbs -->
+<nav class="hidden lg:flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant">
+<span>Projets</span>
+<span class="text-outline">/</span>
+<span class="text-on-surface font-medium">ESP32-S3-AudioNode</span>
+<span class="text-outline">/</span>
+<span class="px-1 py-0.2 rounded bg-surface-container font-code-sm text-code-sm text-primary">Rev 0.4</span>
+<span class="text-outline text-code-sm">[main: a3f89d]</span>
+</nav>
+</div>
+<!-- Center: Main Navigation Links (PCB Routing Active) -->
+<nav class="flex items-center h-full gap-space-lg">
+<a class="text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-colors" href="#">Schéma</a>
+<!-- Routage PCB active per JSON style_active_navigation -->
+<a class="text-primary font-label-md text-label-md border-b-2 border-primary pb-1 flex items-center gap-1" href="#">
+<span>Routage PCB</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:text-on-surface flex items-center gap-1 transition-colors" href="#">
+<span>Vérification DRC</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-colors" href="#">Fabrication</a>
+</nav>
+<!-- Right Actions Cluster -->
+<div class="flex items-center gap-space-sm">
+<!-- Compiler Secondary Action -->
+<button class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container border border-outline-variant font-label-md text-label-md text-on-surface hover:bg-surface-container-high active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[15px] text-primary" data-icon="terminal">terminal</span>
+<span>Compiler (F5)</span>
+</button>
+<!-- Primary Action: Gerber Export -->
+<button class="flex items-center gap-1.5 px-3 py-1 rounded bg-primary-container text-on-primary-container font-headline-sm text-headline-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-none">
+<span class="material-symbols-outlined text-[16px]" data-icon="precision_manufacturing">precision_manufacturing</span>
+<span>Exporter Gerber</span>
+</button>
+<div class="h-3.5 w-px bg-outline-variant"></div>
+<!-- Language Pill -->
+<div class="inline-flex rounded border border-outline-variant bg-surface-container p-0.5 text-code-sm">
+<button class="px-1.5 py-0.5 rounded bg-surface-container-high text-primary font-semibold">FR</button>
+<button class="px-1.5 py-0.5 text-on-surface-variant hover:text-on-surface">EN</button>
+</div>
+<!-- Icon Actions -->
+<button class="p-1 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" id="themeToggleBtn" title="Thème">
+<span class="material-symbols-outlined text-[18px]" data-icon="tune">tune</span>
+</button>
+<!-- Settings Trigger -->
+<button class="flex items-center gap-1 px-1.5 py-1 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border border-transparent hover:border-outline-variant transition-colors" id="openSettingsBtn" title="Paramètres et Seuils DRC">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings">settings</span>
+</button>
+<!-- Profile Avatar -->
+<button class="p-0.5 rounded text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE : 3-COLUMN RIGOROUS LAYOUT                                -->
+<!-- ========================================================================= -->
+<div class="flex-1 flex overflow-hidden w-full relative">
+<!-- ----------------------------------------------------------------------- -->
+<!-- 2. LEFT COLUMN : STEP-BY-STEP DESIGN PIPELINE (SideNavBar execution)   -->
+<!-- ----------------------------------------------------------------------- -->
+<aside class="w-72 bg-surface-container-low border-r border-outline-variant flex flex-col justify-between shrink-0 select-none z-20">
+<!-- Top Section: Header & HITL Switcher -->
+<div class="p-space-md border-b border-outline-variant space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="account_tree">account_tree</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Pipeline Guidé</span>
+</div>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-highest font-code-sm text-code-sm text-primary">Ato 0.2.4</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Projet ESP32-S3 IoT • Mode Supervisé</p>
+<!-- Mode Toggle [Supervisé (HITL) | 100% Autonome] -->
+<div class="pt-1">
+<div class="grid grid-cols-2 p-0.5 rounded bg-surface-container border border-outline-variant text-center font-code-sm text-code-sm">
+<button class="py-1 rounded bg-surface-container-high text-primary font-medium flex items-center justify-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>Supervisé</span>
+</button>
+<button class="py-1 rounded text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1 transition-colors">
+<span>Autonome</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Middle Section: 4 Steps Accordion/Tracker -->
+<div class="flex-1 overflow-y-auto p-space-sm space-y-space-xs">
+<!-- Étape 1 : Brouillon d'architecture (Completed) -->
+<div class="p-2.5 rounded bg-surface-container/50 border border-outline-variant/60 hover:border-outline-variant transition-colors group">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-md text-label-md font-semibold text-on-surface">1. Brouillon d'architecture</span>
+<span class="inline-flex items-center gap-1 text-code-sm text-primary font-medium">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+<span>Terminé</span>
+</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-snug">Microcontrôleur ESP32-S3 + PMIC AP2112K</p>
+<div class="mt-2 flex items-center justify-between text-code-sm text-outline">
+<span>Validé le 24 Mai 14:12</span>
+<button class="p-0.5 text-on-surface-variant hover:text-primary transition-colors" title="Inspecter l'architecture">
+<span class="material-symbols-outlined text-[15px]" data-icon="edit_note">edit_note</span>
+</button>
+</div>
+</div>
+<!-- Étape 2 : Schéma validé (Completed) -->
+<div class="p-2.5 rounded bg-surface-container/50 border border-outline-variant/60 hover:border-outline-variant transition-colors group">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-md text-label-md font-semibold text-on-surface">2. Schéma validé</span>
+<span class="inline-flex items-center gap-1 text-code-sm text-primary font-medium">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+<span>Terminé</span>
+</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-snug">24 nets résolus, 18 passifs connectés</p>
+<div class="mt-2 flex items-center justify-between text-code-sm text-outline">
+<span>Validé le 24 Mai 14:28</span>
+<button class="p-0.5 text-on-surface-variant hover:text-primary transition-colors" title="Inspecter la netlist">
+<span class="material-symbols-outlined text-[15px]" data-icon="account_tree">account_tree</span>
+</button>
+</div>
+</div>
+<!-- Étape 3 : Routage & DRC (Active / In Progress) -->
+<div class="p-2.5 rounded bg-surface-container-high border-l-2 border-primary border-t border-r border-b border-outline-variant shadow-sm relative">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-md text-label-md font-semibold text-primary">3. Routage &amp; DRC</span>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-primary-container/20 text-code-sm text-primary font-medium border border-primary/40">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+<span>En cours</span>
+</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-snug">Placement dynamique et calcul du routage différentiel USB &amp; bus I2C.</p>
+<div class="mt-2 py-1 px-2 rounded bg-surface-container-lowest/80 border border-outline-variant/80 font-code-sm text-code-sm flex items-center justify-between">
+<span class="text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="warning">warning</span>
+<span>2 avertissements mineurs</span>
+</span>
+<span class="text-primary font-semibold">0 bloquant</span>
+</div>
+<!-- Action CTA -->
+<div class="mt-2.5 flex items-center gap-1.5">
+<button class="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm hover:brightness-110 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[14px]" data-icon="lock_open">lock_open</span>
+<span>Valider &amp; figer</span>
+</button>
+<button class="px-2 py-1 rounded bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-highest font-code-sm text-code-sm" title="Ré-exécuter DRC">
+              Exécuter DRC
+            </button>
+</div>
+</div>
+<!-- Étape 4 : Fichiers de Fabrication (Pending) -->
+<div class="p-2.5 rounded bg-surface-container-lowest/40 border border-outline-variant/30 opacity-60">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">4. Fichiers de Fabrication</span>
+<span class="inline-flex items-center gap-1 text-code-sm text-outline">
+<span class="material-symbols-outlined text-[13px]" data-icon="lock">lock</span>
+<span>En attente</span>
+</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline leading-snug">Génération Gerber RS-274X, CPL et BOM JLCPCB.</p>
+</div>
+</div>
+<!-- Bottom Widget: Token Telemetry & Settings Button -->
+<div class="p-space-md border-t border-outline-variant bg-surface-container-low/90 space-y-space-sm">
+<div>
+<div class="flex items-center justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="monitoring">monitoring</span>
+<span>Budget Jetons IA</span>
+</span>
+<span class="font-code-sm text-code-sm text-primary">36.8%</span>
+</div>
+<!-- Gauge bar -->
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden border border-outline-variant/40">
+<div class="h-full bg-primary rounded-full" style="width: 36.8%"></div>
+</div>
+<p class="mt-1 font-code-sm text-code-sm text-outline flex justify-between">
+<span>18 420 / 50 000 jetons</span>
+<span>~0,04 €</span>
+</p>
+<span class="block font-code-sm text-code-sm text-outline/80 mt-0.5 truncate">Modèle : Qwen2.5-Coder (Local)</span>
+</div>
+<button class="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded bg-surface-container hover:bg-surface-container-high border border-outline-variant font-label-md text-label-md text-on-surface transition-colors" id="openSettingsBottomBtn">
+<span class="material-symbols-outlined text-[15px]" data-icon="settings">settings</span>
+<span>Paramètres &amp; Seuils DRC</span>
+</button>
+</div>
+</aside>
+<!-- ----------------------------------------------------------------------- -->
+<!-- 3. CENTRAL COLUMN : AI CO-PILOT & CODE MODIFICATION FEED               -->
+<!-- ----------------------------------------------------------------------- -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface border-r border-outline-variant overflow-hidden">
+<!-- Thread Header -->
+<div class="h-10 px-space-md border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between shrink-0">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="terminal">terminal</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Fil de discussion Co-pilot IA</span>
+<span class="px-2 py-0.5 rounded bg-surface-container font-code-sm text-code-sm text-primary border border-outline-variant">
+            Contexte : Routage bus I2C &amp; Alimentation 3.3V
+          </span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-code-sm text-code-sm text-on-surface-variant flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>qwen2.5-coder:32b</span>
+</span>
+<span class="font-code-sm text-code-sm text-outline border-l border-outline-variant pl-2">FP16 • 8.4 tok/s</span>
+</div>
+</div>
+<!-- Messages & Diff Scroll Area -->
+<div class="flex-1 overflow-y-auto p-space-md space-y-space-md">
+<!-- User Message Bubble -->
+<div class="flex items-start gap-space-sm max-w-3xl">
+<div class="w-6 h-6 rounded bg-surface-container-highest text-on-surface flex items-center justify-center font-code-sm text-code-sm shrink-0 border border-outline-variant">
+            PCB
+          </div>
+<div class="flex-1 bg-surface-container-low border border-outline-variant rounded p-space-md">
+<div class="flex items-center justify-between mb-1 font-label-sm text-label-sm text-outline">
+<span class="font-medium text-on-surface">Ingénieur Matériel (Vous)</span>
+<span>14:31:02</span>
+</div>
+<p class="text-on-surface font-body-md text-body-md">
+              Route l'alimentation 3.3V, ajoute les condensateurs de découplage 10µF près des broches VDD et vérifie l'espacement thermique.
+            </p>
+</div>
+</div>
+<!-- AI Co-pilot Response with .ato Diff Card -->
+<div class="flex items-start gap-space-sm max-w-3xl">
+<div class="w-6 h-6 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-code-sm text-code-sm shrink-0 font-bold">
+            ato
+          </div>
+<div class="flex-1 bg-surface-container-low border border-outline-variant rounded overflow-hidden">
+<!-- Header of AI card -->
+<div class="px-space-md py-2 bg-surface-container-lowest border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-semibold text-primary">Atopile Copilot</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container-high font-code-sm text-code-sm text-on-surface-variant">
+                  82ms • Passe d'inférence 4
+                </span>
+</div>
+<div class="font-code-sm text-code-sm flex items-center gap-2">
+<span class="text-primary font-medium">+14 lignes</span>
+<span class="text-error font-medium">-2 lignes</span>
+</div>
+</div>
+<!-- Natural language explanation -->
+<div class="p-space-md space-y-space-sm border-b border-outline-variant/60">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                J'ai instancié les condensateurs de découplage <code class="px-1 py-0.5 rounded bg-surface-container font-code-sm text-code-sm text-primary">C1</code> et <code class="px-1 py-0.5 rounded bg-surface-container font-code-sm text-code-sm text-primary">C2</code> en boîtier SMD 0402, routé les pastilles VDD au rail <code class="px-1 py-0.5 rounded bg-surface-container font-code-sm text-code-sm text-secondary">NET_3V3</code> avec une largeur de piste adaptée (0.50mm) et réservé un via de retour de masse vers le plan inférieur.
+              </p>
+</div>
+<!-- Interactive Diff Block (.ato syntax) -->
+<div class="bg-surface-container-lowest font-code-sm text-code-sm">
+<div class="flex items-center justify-between px-space-md py-1 border-b border-outline-variant/40 bg-surface-container-lowest text-outline">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="code">code</span>
+<span>electronics/power_delivery.ato (Diff révision)</span>
+</span>
+<span class="text-primary-fixed-dim">Prêt pour injection</span>
+</div>
+<div class="p-2 space-y-0.5 overflow-x-auto leading-relaxed">
+<div class="text-outline">@@ -18,6 +18,18 @@ module ESP32PowerSupply:</div>
+<div class="text-outline">   signal gnd ~ node.gnd</div>
+<div class="bg-error/10 text-error px-1 rounded flex items-center">
+<span class="w-4 select-none">-</span>
+<span>component C_old: value = 1uF; # Capacité insuffisante pour le transitoire RF</span>
+</div>
+<div class="bg-primary/10 text-primary px-1 rounded flex items-center">
+<span class="w-4 select-none">+</span>
+<span>component C1 from Cap_0402: value = 10uF +/- 10%; package = "0402"; thermal_clearance = 0.20mm</span>
+</div>
+<div class="bg-primary/10 text-primary px-1 rounded flex items-center">
+<span class="w-4 select-none">+</span>
+<span>component C2 from Cap_0402: value = 10uF +/- 10%; package = "0402"; thermal_clearance = 0.20mm</span>
+</div>
+<div class="bg-primary/10 text-primary px-1 rounded flex items-center">
+<span class="w-4 select-none">+</span>
+<span>C1.p1 ~ NET_3V3; C1.p2 ~ gnd; # Piste 0.50mm VDD_MCU_PIN2</span>
+</div>
+<div class="bg-primary/10 text-primary px-1 rounded flex items-center">
+<span class="w-4 select-none">+</span>
+<span>C2.p1 ~ NET_3V3; C2.p2 ~ gnd; # Piste 0.50mm VDD_MCU_PIN44</span>
+</div>
+<div class="text-outline">   power_rail_3v3.max_ripple = 30mV</div>
+</div>
+</div>
+<!-- Footer of AI block: Action validation -->
+<div class="p-space-sm bg-surface-container-low flex items-center justify-between border-t border-outline-variant">
+<span class="font-code-sm text-code-sm text-on-surface-variant">Raccourci : <kbd class="px-1.5 py-0.5 rounded bg-surface-container font-semibold border border-outline-variant text-on-surface">Tab</kbd> pour accepter le code</span>
+<div class="flex items-center gap-space-sm">
+<button class="px-2 py-1 rounded border border-outline-variant text-on-surface hover:bg-surface-container font-label-sm text-label-sm">Rejeter</button>
+<button class="px-3 py-1 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold hover:opacity-90">Appliquer au Schéma &amp; PCB</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Retractable SSE Stream Console [ato-daemon] -->
+<div class="rounded border border-outline-variant bg-surface-container-lowest overflow-hidden">
+<button class="w-full px-space-md py-1.5 bg-surface-container flex items-center justify-between font-label-sm text-label-sm text-on-surface hover:bg-surface-container-high transition-colors" id="toggleSSELogs">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-semibold">Flux d'Événements SSE (ato-daemon : 127.0.0.1:8080/events)</span>
+</div>
+<div class="flex items-center gap-2 text-outline">
+<span class="font-code-sm text-code-sm">14:31:05.892</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200" data-icon="expand_more" id="sseChevron">expand_more</span>
+</div>
+</button>
+<div class="p-space-sm font-code-sm text-code-sm space-y-1 bg-surface-container-lowest max-h-32 overflow-y-auto border-t border-outline-variant/40" id="sseContent">
+<div class="text-on-surface-variant"><span class="text-primary">[ATO-CORE]</span> 14:31:02 AST parsing completed in 14.2ms. Generated 18 component footprints.</div>
+<div class="text-on-surface-variant"><span class="text-secondary">[ROUTER]</span> 14:31:03 Auto-router negotiated pair NET_D_P / NET_D_N (90.4Ω differential Z).</div>
+<div class="text-on-surface-variant"><span class="text-primary">[ROUTER]</span> 14:31:04 Placed via V_3V3_04 at X: 45.20mm Y: 28.65mm (Drill 0.30mm, Pad 0.60mm).</div>
+<div class="text-secondary"><span class="text-secondary">[DRC-CHECK]</span> 14:31:05 Warning W01: Net NET_3V3 clearance to via V_3V3_04 is 0.185mm (rule: min 0.200mm).</div>
+</div>
+</div>
+</div>
+<!-- Quick Action Pills Bar -->
+<div class="px-space-md py-1.5 bg-surface-container-low border-t border-outline-variant flex items-center gap-space-sm overflow-x-auto shrink-0">
+<span class="font-label-sm text-label-sm text-outline shrink-0">Suggestions rapides :</span>
+<button class="px-2 py-0.5 rounded bg-surface-container hover:bg-surface-container-high border border-outline-variant font-code-sm text-code-sm text-on-surface flex items-center gap-1 transition-colors shrink-0">
+<span class="text-primary">+</span> Découplage VDD (10µF + 100nF)
+        </button>
+<button class="px-2 py-0.5 rounded bg-surface-container hover:bg-surface-container-high border border-outline-variant font-code-sm text-code-sm text-on-surface flex items-center gap-1 transition-colors shrink-0">
+<span class="text-primary">+</span> Plan de masse polygonale B.Cu
+        </button>
+<button class="px-2 py-0.5 rounded bg-surface-container hover:bg-surface-container-high border border-outline-variant font-code-sm text-code-sm text-secondary flex items-center gap-1 transition-colors shrink-0">
+<span class="material-symbols-outlined text-[13px]" data-icon="auto_fix_high">auto_fix_high</span> Corriger Dégagement DRC
+        </button>
+<button class="px-2 py-0.5 rounded bg-surface-container hover:bg-surface-container-high border border-outline-variant font-code-sm text-code-sm text-on-surface flex items-center gap-1 transition-colors shrink-0">
+<span class="text-primary">↺</span> Re-router traces I2C
+        </button>
+</div>
+<!-- AI Prompt Input Fixed Dock -->
+<div class="p-space-md bg-surface-container-lowest border-t border-outline-variant shrink-0">
+<div class="relative rounded bg-surface-container-low border border-outline-variant focus-within:border-primary transition-colors">
+<textarea class="w-full bg-transparent p-2.5 text-on-surface placeholder:text-outline font-body-md text-body-md focus:outline-none resize-none" placeholder="Donnez une instruction de conception (ex. 'Augmente l'espacement entre NET_3V3 et le via GND à 0.22mm pour passer le DRC JLCPCB')..." rows="2"></textarea>
+<div class="flex items-center justify-between px-2.5 py-1.5 bg-surface-container border-t border-outline-variant/40 rounded-b">
+<div class="flex items-center gap-2 text-outline font-code-sm text-code-sm">
+<span>Tokens prompt : 312</span>
+<span>•</span>
+<span><kbd class="font-sans">Ctrl</kbd> + <kbd class="font-sans">Entrée</kbd> pour exécuter</span>
+</div>
+<button class="flex items-center gap-1.5 px-3 py-1 rounded bg-primary-container text-on-primary-container font-headline-sm text-headline-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all">
+<span>Générer</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="play_arrow">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- ----------------------------------------------------------------------- -->
+<!-- 4. RIGHT COLUMN : PCB VIEWPORT & INTEGRATED DRC/ERC CONSOLE            -->
+<!-- ----------------------------------------------------------------------- -->
+<aside class="w-96 bg-surface-container-lowest flex flex-col shrink-0 select-none overflow-hidden">
+<!-- Top View Toolbar -->
+<div class="h-10 px-space-md border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between shrink-0">
+<!-- View Tabs -->
+<div class="flex items-center gap-1">
+<button class="px-2 py-1 rounded bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold border-b-2 border-primary">
+            PCB Layout
+          </button>
+<button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm transition-colors">
+            Schéma
+          </button>
+<button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm transition-colors">
+            Code .ato
+          </button>
+<button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm transition-colors">
+            BOM
+          </button>
+</div>
+<!-- 2D / 3D Toggle -->
+<div class="inline-flex rounded border border-outline-variant bg-surface-container p-0.5 font-code-sm text-code-sm">
+<button class="px-2 py-0.5 rounded bg-surface-container-high text-primary font-medium">2D CAD</button>
+<button class="px-2 py-0.5 text-on-surface-variant hover:text-on-surface">3D</button>
+</div>
+</div>
+<!-- Layer Filters & Grid Metadata -->
+<div class="px-space-md py-1 bg-surface-container-low border-b border-outline-variant flex items-center justify-between font-code-sm text-code-sm">
+<div class="flex items-center gap-2">
+<label class="flex items-center gap-1 text-primary cursor-pointer">
+<span class="w-2.5 h-2.5 rounded-sm bg-primary-container inline-block"></span>
+<span>F.Cu</span>
+</label>
+<label class="flex items-center gap-1 text-secondary cursor-pointer">
+<span class="w-2.5 h-2.5 rounded-sm bg-secondary-container inline-block"></span>
+<span>B.Cu</span>
+</label>
+<label class="flex items-center gap-1 text-on-surface cursor-pointer">
+<span class="w-2.5 h-2.5 rounded-sm bg-surface-variant border border-outline inline-block"></span>
+<span>Silk</span>
+</label>
+<label class="flex items-center gap-1 text-outline cursor-pointer">
+<span class="w-2.5 h-2.5 rounded-sm border border-outline-variant inline-block"></span>
+<span>Edge</span>
+</label>
+</div>
+<div class="text-outline">
+<span>Grille: 0.50mm</span>
+<span class="ml-1 text-on-surface-variant">X: 45.20 Y: 28.65</span>
+</div>
+</div>
+<!-- Vector CAD Styled PCB Canvas -->
+<div class="flex-1 bg-surface-container-lowest p-3 relative overflow-hidden flex items-center justify-center border-b border-outline-variant">
+<!-- Precision Grid Pattern -->
+<div class="absolute inset-0 opacity-15 pointer-events-none" style="background-image: radial-gradient(#86948a 1px, transparent 1px); background-size: 16px 16px;"></div>
+<!-- Stylized PCB Board -->
+<div class="w-full h-full max-h-[340px] rounded border-2 border-primary/60 bg-[#0d1612] relative shadow-2xl p-4 flex flex-col justify-between overflow-hidden">
+<!-- Board Edge Silk Text & Markings -->
+<div class="flex justify-between items-start z-10">
+<div>
+<span class="font-code-sm text-code-sm font-bold tracking-widest text-[#bbcabf] block">ESP32-S3 AUDIO NODE</span>
+<span class="font-code-sm text-code-sm text-primary/70">REV 0.4 • LAYER 1/2</span>
+</div>
+<!-- Mounting Holes (Gold Pads) -->
+<div class="w-4 h-4 rounded-full border border-secondary-container bg-surface flex items-center justify-center shadow-inner">
+<div class="w-2 h-2 rounded-full bg-secondary-container"></div>
+</div>
+</div>
+<!-- Centered Components Representation -->
+<div class="relative my-auto flex items-center justify-center">
+<!-- MCU U1 (ESP32-S3 QFN-56) -->
+<div class="w-28 h-28 bg-[#18231d] border border-outline/70 rounded relative flex flex-col items-center justify-center shadow-lg group">
+<!-- Pin notch -->
+<div class="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-secondary-container"></div>
+<span class="font-code-sm text-code-sm font-bold text-on-surface">U1</span>
+<span class="font-code-sm text-[9px] text-outline">ESP32-S3</span>
+<span class="font-code-sm text-[8px] text-primary">QFN-56</span>
+<!-- QFN Pads representation (Top/Bottom/Left/Right) -->
+<div class="absolute -top-1 w-20 flex justify-between px-1">
+<span class="w-1 h-1 bg-secondary-container"></span><span class="w-1 h-1 bg-secondary-container"></span><span class="w-1 h-1 bg-secondary-container"></span><span class="w-1 h-1 bg-secondary-container"></span>
+</div>
+<div class="absolute -bottom-1 w-20 flex justify-between px-1">
+<span class="w-1 h-1 bg-secondary-container"></span><span class="w-1 h-1 bg-secondary-container"></span><span class="w-1 h-1 bg-secondary-container"></span><span class="w-1 h-1 bg-secondary-container"></span>
+</div>
+</div>
+<!-- Capacitors C1 & C2 (SMD 0402) -->
+<div class="absolute -left-2 top-8 flex flex-col gap-2">
+<div class="w-6 h-3 bg-[#24352b] border border-outline flex items-center justify-between px-0.5 rounded-[1px]" title="C1 (10µF 0402)">
+<span class="w-1 h-2 bg-secondary"></span>
+<span class="font-code-sm text-[8px] text-primary">C1</span>
+<span class="w-1 h-2 bg-secondary"></span>
+</div>
+<div class="w-6 h-3 bg-[#24352b] border border-outline flex items-center justify-between px-0.5 rounded-[1px]" title="C2 (10µF 0402)">
+<span class="w-1 h-2 bg-secondary"></span>
+<span class="font-code-sm text-[8px] text-primary">C2</span>
+<span class="w-1 h-2 bg-secondary"></span>
+</div>
+</div>
+<!-- Routed Copper Traces (SVG Overlay) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewbox="0 0 200 200">
+<!-- NET_3V3 Trace (with clearance alert) -->
+<path d="M 40,85 L 75,85 L 75,60" fill="none" stroke="#4edea3" stroke-linecap="round" stroke-width="3"></path>
+<path d="M 40,105 L 60,105 L 60,120 L 75,120" fill="none" stroke="#4edea3" stroke-linecap="round" stroke-width="3"></path>
+<!-- I2C Traces -->
+<path d="M 130,80 L 165,80" fill="none" stroke="#ffb77d" stroke-dasharray="3,2" stroke-width="1.8"></path>
+<path d="M 130,95 L 165,95" fill="none" stroke="#ffb77d" stroke-width="1.8"></path>
+<!-- Thermal Ground Via V_3V3_04 near trace with warning circle -->
+<circle cx="83" cy="62" fill="#1c2023" r="4.5" stroke="#d97707" stroke-width="1.5"></circle>
+<circle cx="83" cy="62" fill="#d97707" r="2"></circle>
+</svg>
+<!-- Interactive DRC Warning Pinpoint on Board -->
+<div class="absolute -top-3 left-24 z-20">
+<div class="px-1.5 py-0.5 rounded bg-surface-container-highest border border-secondary-container text-secondary font-code-sm text-[10px] flex items-center gap-1 shadow-lg animate-bounce">
+<span class="material-symbols-outlined text-[12px]" data-icon="warning">warning</span>
+<span>DRC-W01 (0.185mm)</span>
+</div>
+</div>
+<!-- Antenna Keepout Zone -->
+<div class="absolute right-0 top-0 w-12 h-16 border border-dashed border-error/50 bg-error/5 flex items-center justify-center p-1 text-center">
+<span class="font-code-sm text-[7px] text-error/80 uppercase">Keepout RF</span>
+</div>
+</div>
+<!-- Bottom silk & info -->
+<div class="flex justify-between items-end z-10 text-code-sm text-outline">
+<span>Dim: 48.0 × 32.0 mm</span>
+<span class="text-primary">2 Couches JLCPCB</span>
+</div>
+</div>
+<!-- Canvas Floating Controls -->
+<div class="absolute bottom-4 right-4 flex flex-col gap-1 bg-surface-container/90 border border-outline-variant p-0.5 rounded">
+<button class="w-6 h-6 flex items-center justify-center hover:bg-surface-container-high text-on-surface" title="Zoom +">+</button>
+<button class="w-6 h-6 flex items-center justify-center hover:bg-surface-container-high text-on-surface" title="Zoom -">-</button>
+<button class="w-6 h-6 flex items-center justify-center hover:bg-surface-container-high text-on-surface" title="Recentrer">⛶</button>
+</div>
+</div>
+<!-- Integrated DRC / ERC Inspection Console -->
+<div class="h-64 flex flex-col bg-surface-container-lowest overflow-hidden">
+<!-- Console Header & Status Badges -->
+<div class="px-space-md py-2 border-b border-outline-variant bg-surface-container-low flex items-center justify-between shrink-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Inspection DRC / ERC</span>
+<span class="px-1.5 py-0.2 rounded bg-primary/10 text-primary border border-primary/30 font-code-sm text-code-sm font-medium">0 Erreur</span>
+<span class="px-1.5 py-0.2 rounded bg-secondary-container/20 text-secondary border border-secondary-container/40 font-code-sm text-code-sm font-medium">2 Avertissements</span>
+</div>
+<button class="px-2 py-0.5 rounded bg-surface-container hover:bg-surface-container-high border border-outline-variant font-code-sm text-code-sm text-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[13px]" data-icon="refresh">refresh</span>
+<span>Réanalyser</span>
+</button>
+</div>
+<!-- Findings List -->
+<div class="flex-1 overflow-y-auto p-2 space-y-1.5">
+<!-- Warning 1: DRC-W01 (Interactive Card) -->
+<div class="p-2 rounded bg-surface-container border-l-2 border-secondary-container border-t border-r border-b border-outline-variant/60 hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex items-center justify-between mb-1">
+<span class="font-code-sm text-code-sm font-semibold text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="warning">warning</span>
+<span>DRC-W01 : Dégagement piste-via</span>
+</span>
+<span class="font-code-sm text-[10px] text-outline">NET_3V3 ↔ Via_GND</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-snug">
+              Dégagement mesuré à <strong class="text-secondary">0.185mm</strong>. Requis &gt;= <strong class="text-on-surface">0.200mm</strong> selon les contraintes de fabrication JLCPCB 2-Layer.
+            </p>
+<div class="mt-2 flex items-center justify-end gap-1">
+<button class="px-2 py-0.5 rounded bg-surface-container-highest hover:bg-surface-bright text-on-surface font-label-sm text-label-sm">
+                Surligner
+              </button>
+<button class="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold hover:opacity-90 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="auto_fix_high">auto_fix_high</span>
+<span>Auto-fix IA</span>
+</button>
+</div>
+</div>
+<!-- Warning 2: ERC Informational Notice -->
+<div class="p-2 rounded bg-surface-container/60 border border-outline-variant/40 hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between mb-0.5">
+<span class="font-code-sm text-code-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="info">info</span>
+<span>ERC-I04 : Configuration broche IO</span>
+</span>
+<span class="font-code-sm text-[10px] text-outline">GPIO0 (Boot)</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-snug">
+              Broche GPIO0 configurée avec résistance pull-up interne du microcontrôleur active (45kΩ). Aucune résistance externe détectée (Toléré).
+            </p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- ========================================================================= -->
+<!-- MODAL / PANNEAU DE RÉGLAGES (Settings & DRC Thresholds Overlay)           -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" id="settingsModal">
+<div class="w-full max-w-lg bg-surface-container-low border border-outline-variant rounded-lg shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
+<!-- Modal Header -->
+<div class="px-space-md py-3 border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="settings">settings</span>
+<h2 class="font-headline-md text-headline-md font-semibold text-on-surface">Réglages &amp; Paramètres du Projet</h2>
+</div>
+<button class="p-1 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" id="closeSettingsBtn">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Body Form -->
+<div class="p-space-md space-y-space-md max-h-[768px] overflow-y-auto">
+<!-- Setting 1: Local Engine Connection -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface">Moteur ATO Local (Daemon)</label>
+<div class="flex items-center gap-2">
+<input class="flex-1 px-2.5 py-1.5 rounded bg-surface-container-lowest border border-outline-variant font-code-sm text-code-sm text-on-surface focus:outline-none focus:border-primary" type="text" value="http://localhost:8080"/>
+<span class="inline-flex items-center gap-1 px-2 py-1.5 rounded bg-surface-container font-code-sm text-code-sm text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              Connecté
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-outline">Fournit la compilation schématique déterministe et l'exposition SSE.</p>
+</div>
+<!-- Setting 2: DRC Rules & Manufacturer Target -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface">Profil &amp; Règles de Fabrication DRC</label>
+<select class="w-full px-2.5 py-1.5 rounded bg-surface-container-lowest border border-outline-variant font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary">
+<option selected="">JLCPCB 2-Couches Standard (Dégagement min. 0.200mm / Piste min. 0.127mm)</option>
+<option>JLCPCB 4-Couches Haute Densité (Dégagement min. 0.150mm / Piste min. 0.090mm)</option>
+<option>PCBWay 2-Couches Classique (Dégagement 0.150mm)</option>
+<option>Règles personnalisées (atopile.config.yaml)</option>
+</select>
+</div>
+<!-- Setting 3: Threshold Spinners -->
+<div class="grid grid-cols-2 gap-space-md">
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Dégagement Piste-Via minimal</label>
+<div class="relative">
+<input class="w-full px-2.5 py-1.5 rounded bg-surface-container-lowest border border-outline-variant font-code-sm text-code-sm text-on-surface focus:outline-none focus:border-primary" type="text" value="0.200"/>
+<span class="absolute right-2.5 top-1.5 text-outline font-code-sm text-code-sm">mm</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Largeur minimale de piste</label>
+<div class="relative">
+<input class="w-full px-2.5 py-1.5 rounded bg-surface-container-lowest border border-outline-variant font-code-sm text-code-sm text-on-surface focus:outline-none focus:border-primary" type="text" value="0.150"/>
+<span class="absolute right-2.5 top-1.5 text-outline font-code-sm text-code-sm">mm</span>
+</div>
+</div>
+</div>
+<!-- Setting 4: AI Model Selection & Autonomous Threshold -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface">Modèle IA Local &amp; Degré d'Autonomie</label>
+<select class="w-full px-2.5 py-1.5 rounded bg-surface-container-lowest border border-outline-variant font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary">
+<option selected="">Local : Qwen 2.5 Coder 32B (Q4_K_M • Ollama)</option>
+<option>Local : DeepSeek-Coder-V2 Lite (16B)</option>
+<option>Cloud Fallback : Claude 3.5 Sonnet (API Key requise)</option>
+</select>
+<div class="pt-2">
+<div class="flex justify-between font-label-sm text-label-sm text-outline mb-1">
+<span>Niveau de supervision humaine</span>
+<span class="text-primary font-medium">Validation explicite à chaque routage (HITL)</span>
+</div>
+<input class="w-full accent-primary cursor-pointer" max="3" min="1" type="range" value="2"/>
+</div>
+</div>
+<!-- Setting 5: Language & UI -->
+<div class="grid grid-cols-2 gap-space-md pt-1">
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Langue de l'interface</label>
+<select class="w-full px-2.5 py-1.5 rounded bg-surface-container-lowest border border-outline-variant font-body-md text-body-md text-on-surface">
+<option selected="">Français (Intégral)</option>
+<option>English</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Thème de rendu</label>
+<select class="w-full px-2.5 py-1.5 rounded bg-surface-container-lowest border border-outline-variant font-body-md text-body-md text-on-surface">
+<option selected="">Sombre Technique (Masque Solder)</option>
+<option>Clair Laboratoire</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-space-md py-2.5 border-t border-outline-variant bg-surface-container flex items-center justify-between">
+<button class="px-3 py-1 rounded border border-outline-variant text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors" id="cancelSettingsBtn">
+          Annuler
+        </button>
+<button class="px-4 py-1.5 rounded bg-primary-container text-on-primary-container font-headline-sm text-headline-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all" id="saveSettingsBtn">
+          Enregistrer les modifications
+        </button>
+</div>
+</div>
+</div>
+<!-- Inline Script for UI Micro-Interactions (SSE fold & Settings Modal) -->
+<script>
+    // Toggle SSE log panel
+    const toggleSSEBtn = document.getElementById('toggleSSELogs');
+    const sseContent = document.getElementById('sseContent');
+    const sseChevron = document.getElementById('sseChevron');
+
+    if (toggleSSEBtn && sseContent && sseChevron) {
+      toggleSSEBtn.addEventListener('click', () => {
+        const isHidden = sseContent.classList.contains('hidden');
+        if (isHidden) {
+          sseContent.classList.remove('hidden');
+          sseChevron.style.transform = 'rotate(0deg)';
+        } else {
+          sseContent.classList.add('hidden');
+          sseChevron.style.transform = 'rotate(-90deg)';
+        }
+      });
+    }
+
+    // Settings Modal handlers
+    const modal = document.getElementById('settingsModal');
+    const openBtn1 = document.getElementById('openSettingsBtn');
+    const openBtn2 = document.getElementById('openSettingsBottomBtn');
+    const closeBtn = document.getElementById('closeSettingsBtn');
+    const cancelBtn = document.getElementById('cancelSettingsBtn');
+    const saveBtn = document.getElementById('saveSettingsBtn');
+
+    function openSettings() {
+      if (modal) modal.classList.remove('hidden');
+    }
+    function closeSettings() {
+      if (modal) modal.classList.add('hidden');
+    }
+
+    if (openBtn1) openBtn1.addEventListener('click', openSettings);
+    if (openBtn2) openBtn2.addEventListener('click', openSettings);
+    if (closeBtn) closeBtn.addEventListener('click', closeSettings);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeSettings);
+    if (saveBtn) saveBtn.addEventListener('click', closeSettings);
+
+    // Close on backdrop click
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeSettings();
+      });
+    }
+  </script>
+</body></html>

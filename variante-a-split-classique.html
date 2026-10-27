@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atopile Studio PCB — Environnement EDA Intelligent</title>
+<!-- Google Fonts: Geist & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with extended plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim as dictated -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary": "#ffb77d",
+            "on-surface-variant": "#bbcabf",
+            "tertiary": "#ffb3ad",
+            "on-error-container": "#ffdad6",
+            "inverse-on-surface": "#2d3134",
+            "surface-dim": "#101417",
+            "on-tertiary-fixed": "#410004",
+            "error-container": "#93000a",
+            "surface-variant": "#313539",
+            "surface-container-highest": "#313539",
+            "on-tertiary-container": "#79000e",
+            "surface-tint": "#4edea3",
+            "tertiary-fixed": "#ffdad7",
+            "tertiary-container": "#ff7a73",
+            "on-tertiary": "#68000a",
+            "on-background": "#e0e3e7",
+            "tertiary-fixed-dim": "#ffb3ad",
+            "surface-container-high": "#262a2e",
+            "outline": "#86948a",
+            "on-primary-container": "#00422b",
+            "background": "#101417",
+            "inverse-surface": "#e0e3e7",
+            "on-secondary-fixed": "#2f1500",
+            "on-error": "#690005",
+            "surface": "#101417",
+            "on-primary-fixed": "#002113",
+            "secondary-fixed-dim": "#ffb77d",
+            "primary-fixed-dim": "#4edea3",
+            "primary-fixed": "#6ffbbe",
+            "primary-container": "#10b981",
+            "error": "#ffb4ab",
+            "surface-container-low": "#181c1f",
+            "surface-container-lowest": "#0b0f12",
+            "surface-bright": "#363a3d",
+            "on-primary-fixed-variant": "#005236",
+            "surface-container": "#1c2023",
+            "secondary-fixed": "#ffdcc3",
+            "on-tertiary-fixed-variant": "#930013",
+            "on-secondary-container": "#432100",
+            "on-secondary-fixed-variant": "#6e3900",
+            "secondary-container": "#d97707",
+            "on-secondary": "#4d2600",
+            "on-primary": "#003824",
+            "primary": "#4edea3",
+            "outline-variant": "#3c4a42",
+            "on-surface": "#e0e3e7",
+            "inverse-primary": "#006c49"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xl": "1.5rem",
+            "gutter": "0.75rem",
+            "space-sm": "0.375rem",
+            "margin": "1rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1rem",
+            "space-md": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Geist"],
+            "body-md": ["Geist"],
+            "body-lg": ["Geist"],
+            "headline-md": ["Geist"],
+            "code-sm": ["JetBrains Mono"],
+            "code-md": ["JetBrains Mono"],
+            "headline-sm": ["Geist"],
+            "label-md": ["JetBrains Mono"],
+            "body-sm": ["Geist"],
+            "label-sm": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "headline-lg": [
+              "1.5rem",
+              { "lineHeight": "2rem", "letterSpacing": "-0.02em", "fontWeight": "600" }
+            ],
+            "body-md": [
+              "0.875rem",
+              { "lineHeight": "1.25rem", "letterSpacing": "0em", "fontWeight": "400" }
+            ],
+            "body-lg": [
+              "0.9375rem",
+              { "lineHeight": "1.5rem", "letterSpacing": "-0.005em", "fontWeight": "400" }
+            ],
+            "headline-md": [
+              "1.25rem",
+              { "lineHeight": "1.75rem", "letterSpacing": "-0.015em", "fontWeight": "600" }
+            ],
+            "code-sm": [
+              "0.6875rem",
+              { "lineHeight": "1rem", "letterSpacing": "0em", "fontWeight": "400" }
+            ],
+            "code-md": [
+              "0.8125rem",
+              { "lineHeight": "1.25rem", "letterSpacing": "-0.01em", "fontWeight": "400" }
+            ],
+            "headline-sm": [
+              "1rem",
+              { "lineHeight": "1.5rem", "letterSpacing": "-0.01em", "fontWeight": "600" }
+            ],
+            "label-md": [
+              "0.75rem",
+              { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "500" }
+            ],
+            "body-sm": [
+              "0.75rem",
+              { "lineHeight": "1rem", "letterSpacing": "0em", "fontWeight": "400" }
+            ],
+            "label-sm": [
+              "0.625rem",
+              { "lineHeight": "0.875rem", "letterSpacing": "0.04em", "fontWeight": "600" }
+            ]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 16px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0b0f12;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #3c4a42;
+      border-radius: 2px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #4edea3;
+    }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .status-pulse {
+      animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased h-screen w-screen overflow-hidden flex flex-col font-body-md select-none">
+<!-- ========================================================================= -->
+<!-- 1. TOP NAVIGATION BAR (Exact tokens from JSON Shared Components)           -->
+<!-- ========================================================================= -->
+<header class="bg-surface-container-low dark:bg-surface-container-low border-b border-outline-variant dark:border-outline-variant flat no shadows h-10 w-full flex justify-between items-center px-space-md flex-shrink-0 z-30">
+<!-- Gauche : Marque, Statut Local et Recherche -->
+<div class="flex items-center gap-space-md">
+<div class="text-headline-sm font-headline-sm font-semibold tracking-tight text-on-surface dark:text-on-surface flex items-center gap-2">
+<span class="w-5 h-5 rounded-DEFAULT bg-primary/20 border border-primary flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[13px]" data-icon="memory">memory</span>
+</span>
+<span class="tracking-tight text-on-surface font-semibold text-headline-sm font-headline-sm">Atopile Studio PCB</span>
+</div>
+<!-- Badge Version & Démon local -->
+<div class="flex items-center gap-1.5 px-1.5 py-0.5 rounded-DEFAULT bg-surface-container border border-outline-variant/60 font-code-sm text-code-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-primary status-pulse"></span>
+<span class="text-on-surface font-medium">v0.4.12</span>
+<span class="text-outline">·</span>
+<span class="text-primary font-medium">local : 8080</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<!-- Recherche / Commande Palette Kbd -->
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-2 text-outline text-[14px]" data-icon="search">search</span>
+<input class="bg-surface-container-lowest border border-outline-variant text-on-surface text-code-sm font-code-sm pl-7 pr-2 py-0.5 h-6 rounded-DEFAULT w-52 focus:outline-none focus:border-primary placeholder:text-outline/70 transition-colors" placeholder="Rechercher composant, net (⌘K)..." type="text"/>
+</div>
+</div>
+<!-- Centre : Onglets Principaux -->
+<nav class="hidden md:flex items-center space-x-1 h-full">
+<a class="h-full flex items-center px-space-sm text-label-md font-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface font-normal transition-colors duration-100" href="#schematic">
+        Schematic
+      </a>
+<a class="h-full flex items-center px-space-sm text-label-md font-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface font-normal transition-colors duration-100" href="#code">
+        Code .ato
+      </a>
+<a class="h-full flex items-center px-space-sm text-label-md font-label-md text-primary dark:text-primary border-b-2 border-primary dark:border-primary font-medium" href="#pcb">
+        PCB 2D/3D
+      </a>
+<a class="h-full flex items-center px-space-sm text-label-md font-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface font-normal transition-colors duration-100" href="#bom">
+        BOM
+      </a>
+<a class="h-full flex items-center px-space-sm text-label-md font-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface font-normal transition-colors duration-100" href="#drc">
+        DRC/ERC
+      </a>
+</nav>
+<!-- Droite : Actions d'Export, DRC & Profil -->
+<div class="flex items-center gap-2">
+<!-- Trailing Icon Actions from JSON -->
+<button class="w-6 h-6 flex items-center justify-center rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-100" title="Terminal console">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</button>
+<button class="w-6 h-6 flex items-center justify-center rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-100" title="Gestion des calques">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+</button>
+<button class="w-6 h-6 flex items-center justify-center rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-100" title="Composants et packages">
+<span class="material-symbols-outlined" data-icon="memory">memory</span>
+</button>
+<button class="w-6 h-6 flex items-center justify-center rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors duration-100" title="Paramètres du routage">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+</button>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<!-- Export Gerber Button (Secondaire) -->
+<button class="h-6 px-2.5 rounded-DEFAULT bg-surface-container border border-outline-variant hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-1 active:scale-[0.98] transition-transform duration-100">
+<span class="material-symbols-outlined text-[14px]" data-icon="file_download">file_download</span>
+        Export Gerber
+      </button>
+<!-- Valider le design (Primaire) -->
+<button class="h-6 px-3 rounded-DEFAULT bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold flex items-center gap-1 hover:brightness-110 active:scale-[0.98] transition-all duration-100">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified">verified</span>
+        Valider le design
+      </button>
+<!-- Profile Avatar alt exact -->
+<div class="w-6 h-6 rounded-DEFAULT bg-surface-variant border border-outline-variant flex items-center justify-center text-primary font-code-sm text-[11px] font-semibold" title="User avatar developer profile">
+        AT
+      </div>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- ZONE PRINCIPALE EN 2 COLONNES (SPLIT 1/3 COPILOTE IA, 2/3 WORKSPACE PCB)  -->
+<!-- ========================================================================= -->
+<main class="flex-1 flex overflow-hidden w-full relative">
+<!-- BARRE LATERALE D'ONGLETS COMPACTE (SideNavBar Icon Strip) -->
+<aside class="w-11 bg-surface-container-lowest border-r border-outline-variant flex flex-col justify-between items-center py-2 flex-shrink-0 z-20">
+<div class="flex flex-col items-center gap-1 w-full">
+<!-- AI Agent (Active) -->
+<button class="w-8 h-8 rounded-DEFAULT bg-surface-container text-primary flex items-center justify-center border-l-2 border-primary" title="AI Agent">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+</button>
+<!-- Inspecteur -->
+<button class="w-8 h-8 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container hover:text-on-surface flex items-center justify-center transition-colors" title="Inspecteur">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+</button>
+<!-- Arborescence -->
+<button class="w-8 h-8 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container hover:text-on-surface flex items-center justify-center transition-colors" title="Arborescence">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+</button>
+<!-- Calques Cuivre -->
+<button class="w-8 h-8 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container hover:text-on-surface flex items-center justify-center transition-colors" title="Calques Cuivre">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+</button>
+<!-- Historique Git -->
+<button class="w-8 h-8 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container hover:text-on-surface flex items-center justify-center transition-colors" title="Historique Git">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+</div>
+<div class="flex flex-col items-center gap-1 w-full">
+<!-- Console DRC -->
+<button class="w-8 h-8 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container hover:text-on-surface flex items-center justify-center transition-colors" title="Console DRC">
+<span class="material-symbols-outlined" data-icon="bug_report">bug_report</span>
+</button>
+<!-- Paramètres -->
+<button class="w-8 h-8 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container hover:text-on-surface flex items-center justify-center transition-colors" title="Paramètres">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</aside>
+<!-- COLONNE GAUCHE (1/3 ~ 380px) : AGENT ELECTRONIQUE COPILOTE PCB -->
+<section class="w-[390px] flex-shrink-0 bg-surface-container-lowest border-r border-outline-variant flex flex-col justify-between overflow-hidden z-10">
+<!-- En-tête Copilote & Mode -->
+<div class="p-space-md border-b border-outline-variant bg-surface-container-low flex flex-col gap-2 flex-shrink-0">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="smart_toy">smart_toy</span>
+<span class="text-body-md font-body-md font-semibold text-on-surface">Agent Électronique Copilote</span>
+</div>
+<span class="px-1.5 py-0.5 rounded-DEFAULT bg-primary/10 border border-primary/40 text-primary font-code-sm text-[10px]">
+            ONLINE
+          </span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<!-- Toggle Mode Autonome : Supervisé -->
+<div class="flex items-center gap-2">
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="mode-supervise" type="checkbox"/>
+<label class="w-7 h-4 bg-surface-container-highest peer-checked:bg-primary-container rounded-full peer-checked:after:translate-x-3 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-primary-container peer-checked:after:bg-surface-container-lowest after:rounded-full after:h-3 after:w-3 after:transition-all cursor-pointer" for="mode-supervise"></label>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant font-medium">Mode Autonome : Supervisé</span>
+</div>
+<!-- Modèle actif -->
+<span class="text-code-sm font-code-sm text-outline flex items-center gap-1" title="Passerelle d'inférence locale">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+            Claude 3.7 Sonnet (Local)
+          </span>
+</div>
+</div>
+<!-- Zone de Conversation Chat (Historique) -->
+<div class="flex-1 overflow-y-auto p-space-md space-y-3.5 custom-scrollbar bg-surface-container-lowest">
+<!-- Horodatage début session -->
+<div class="flex items-center justify-center my-1">
+<span class="text-code-sm font-code-sm text-outline bg-surface-container px-2 py-0.5 rounded-DEFAULT">
+            Aujourd'hui · Session locale #ATO-8812
+          </span>
+</div>
+<!-- Bulle Utilisateur 1 -->
+<div class="flex flex-col items-end gap-1 pl-6">
+<div class="flex items-center gap-1.5 text-code-sm font-code-sm text-outline">
+<span>Ingénieur PCB</span>
+<span class="text-[10px]">14:26</span>
+</div>
+<div class="p-2.5 rounded-DEFAULT bg-surface-container-high border border-outline-variant text-on-surface text-body-sm font-body-sm">
+            Peux-tu router l'alimentation 3.3V du microcontrôleur ESP32-S3 et ajouter des condensateurs de découplage 100nF et 10µF au plus près des broches VDD ?
+          </div>
+</div>
+<!-- Bulle Agent Copilote 1 -->
+<div class="flex flex-col items-start gap-1.5 pr-4">
+<div class="flex items-center gap-1.5 text-code-sm font-code-sm text-primary">
+<span class="material-symbols-outlined text-[13px]" data-icon="smart_toy">smart_toy</span>
+<span class="font-medium">Copilote Atopile</span>
+<span class="text-[10px] text-outline">14:26:08</span>
+</div>
+<div class="p-3 rounded-DEFAULT bg-surface-container border-l-2 border-primary border-y border-r border-outline-variant text-on-surface text-body-sm font-body-sm space-y-2.5 w-full">
+<p class="leading-relaxed">
+              Compris ! J'ai placé <span class="font-code-sm text-primary bg-primary/10 px-1 py-0.2 rounded-DEFAULT">C1 (100nF, 0402)</span> et <span class="font-code-sm text-primary bg-primary/10 px-1 py-0.2 rounded-DEFAULT">C2 (10µF, 0805)</span> à 1.2mm des broches VDD3P3.
+            </p>
+<p class="text-on-surface-variant text-body-sm">
+              Traces d'alimentation élargies à <strong>0.4mm</strong> (impédance et courant conformes sous 1.2A). Vérification DRC en cours...
+            </p>
+<!-- Bloc Code Diff .ato -->
+<div class="rounded-DEFAULT bg-surface-container-lowest border border-outline-variant/80 p-2 font-code-sm text-code-sm text-on-surface space-y-0.5">
+<div class="flex items-center justify-between pb-1 mb-1 border-b border-outline-variant/40 text-[10px] text-outline">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[11px]" data-icon="data_object">data_object</span>
+                  src/power_supply.ato
+                </span>
+<span class="text-primary font-medium">+2 composants ajoutés</span>
+</div>
+<div class="text-on-surface-variant"><span class="text-secondary font-medium">component</span> C1 <span class="text-secondary">from</span> Cap_0402 {</div>
+<div class="pl-3 text-primary"><span class="text-outline">+</span> value = 100nF +/- 10%;</div>
+<div class="pl-3 text-primary"><span class="text-outline">+</span> package = "0402";</div>
+<div class="text-on-surface-variant">}</div>
+<div class="text-on-surface-variant"><span class="text-secondary font-medium">component</span> C2 <span class="text-secondary">from</span> Cap_0805 {</div>
+<div class="pl-3 text-primary"><span class="text-outline">+</span> value = 10uF; voltage = 16V;</div>
+<div class="text-on-surface-variant">}</div>
+<div class="text-secondary pt-0.5">net NET_3V3 ~ C1.p1 ~ C2.p1 ~ U1.VDD3P3;</div>
+</div>
+<!-- Badges d'état et actions rapides -->
+<div class="flex items-center justify-between pt-1">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-DEFAULT bg-primary/10 border border-primary/30 text-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[11px]" data-icon="check_circle">check_circle</span>
+                2 modifications appliquées
+              </span>
+<div class="flex items-center gap-1.5">
+<button class="px-2 py-0.5 rounded-DEFAULT bg-surface-container-high border border-outline-variant text-code-sm font-code-sm text-on-surface hover:border-primary transition-colors">
+                  Détails nets
+                </button>
+<button class="px-2 py-0.5 rounded-DEFAULT bg-primary-container text-on-primary-container text-code-sm font-code-sm font-semibold hover:brightness-110">
+                  Appliquer diff
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bulle Utilisateur 2 -->
+<div class="flex flex-col items-end gap-1 pl-6">
+<div class="flex items-center gap-1.5 text-code-sm font-code-sm text-outline">
+<span>Ingénieur PCB</span>
+<span class="text-[10px]">14:27</span>
+</div>
+<div class="p-2.5 rounded-DEFAULT bg-surface-container-high border border-outline-variant text-on-surface text-body-sm font-body-sm">
+            Parfait, vérifie les règles d'isolement haute fréquence et l'espacement avec l'antenne PCB 2.4GHz.
+          </div>
+</div>
+<!-- Bulle Agent Copilote 2 (En cours de réflexion) -->
+<div class="flex flex-col items-start gap-1 pr-6">
+<div class="flex items-center gap-1.5 text-code-sm font-code-sm text-primary">
+<span class="material-symbols-outlined text-[13px]" data-icon="smart_toy">smart_toy</span>
+<span class="font-medium">Copilote Atopile</span>
+<span class="text-[10px] text-outline">14:27:12</span>
+</div>
+<div class="p-2 rounded-DEFAULT bg-surface-container border border-outline-variant text-on-surface-variant text-body-sm font-body-sm flex items-center gap-2">
+<span class="material-symbols-outlined animate-spin text-primary text-[15px]" data-icon="sync">sync</span>
+<span>Calcul du plan de garde RF et dégagement Keepout 3.0mm en cours...</span>
+</div>
+</div>
+</div>
+<!-- Zone d'invites rapides & Prompt Moderne (Bottom input) -->
+<div class="p-space-md border-t border-outline-variant bg-surface-container-low flex flex-col gap-2 flex-shrink-0">
+<!-- Suggestions de prompts en pilules -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+<button class="whitespace-nowrap px-2 py-0.5 rounded-DEFAULT bg-surface-container border border-outline-variant hover:border-primary text-on-surface font-code-sm text-code-sm hover:text-primary transition-colors flex items-center gap-1">
+<span class="text-primary">+</span> Ajouter filtrage
+          </button>
+<button class="whitespace-nowrap px-2 py-0.5 rounded-DEFAULT bg-surface-container border border-outline-variant hover:border-primary text-on-surface font-code-sm text-code-sm hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[11px]" data-icon="verified">verified</span> Vérifier DRC
+          </button>
+<button class="whitespace-nowrap px-2 py-0.5 rounded-DEFAULT bg-surface-container border border-outline-variant hover:border-primary text-on-surface font-code-sm text-code-sm hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[11px]" data-icon="auto_fix_high">auto_fix_high</span> Optimiser pistes
+          </button>
+</div>
+<!-- Cadre de saisie moderne -->
+<div class="relative bg-surface-container-lowest border border-outline-variant rounded-DEFAULT focus-within:border-primary transition-colors p-1.5 flex flex-col gap-1.5">
+<textarea class="w-full bg-transparent text-on-surface text-body-sm font-body-sm placeholder:text-outline resize-none focus:outline-none px-1 pt-0.5" placeholder="Demandez à l'agent de router, optimiser un composant ou vérifier le routage..." rows="2"></textarea>
+<div class="flex items-center justify-between pt-1 border-t border-outline-variant/40">
+<div class="flex items-center gap-1">
+<button class="p-1 text-outline hover:text-on-surface rounded-DEFAULT hover:bg-surface-container transition-colors" title="Joindre schéma .ato ou contrainte netlist">
+<span class="material-symbols-outlined" data-icon="attach_file">attach_file</span>
+</button>
+<!-- Sélecteur de mode -->
+<select class="bg-surface-container text-outline text-label-sm font-label-sm border border-outline-variant/60 rounded-DEFAULT px-1 py-0.5 focus:outline-none focus:text-on-surface">
+<option>Mode Autonome</option>
+<option selected="">Mode Pas-à-Pas</option>
+<option>Strictement DRC</option>
+</select>
+</div>
+<!-- Bouton Envoyer -->
+<button class="h-6 px-2.5 rounded-DEFAULT bg-primary text-surface-container-lowest font-medium text-label-md flex items-center gap-1 hover:brightness-110 active:scale-[0.97] transition-all">
+<span>Envoyer</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="arrow_upward">arrow_upward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ZONE DROITE (2/3) : VISUALISEUR PCB & CONCEPTION HARDWARE -->
+<section class="flex-1 flex flex-col bg-surface-dim overflow-hidden relative">
+<!-- Barre d'outils de visualisation supérieure -->
+<div class="h-9 bg-surface-container-low border-b border-outline-variant flex items-center justify-between px-space-md flex-shrink-0 z-10">
+<!-- Onglets de vue spécifiques canvas -->
+<div class="flex items-center gap-1">
+<button class="px-2.5 py-1 text-label-md font-label-md rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors">
+            Schéma synoptique
+          </button>
+<button class="px-2.5 py-1 text-label-md font-label-md rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+            Code .ato live
+          </button>
+<button class="px-2.5 py-1 text-label-md font-label-md rounded-DEFAULT bg-surface-container text-primary font-medium border border-outline-variant/80 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="grid_4x4">grid_4x4</span>
+            PCB 2D stylisé
+          </button>
+<button class="px-2.5 py-1 text-label-md font-label-md rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors">
+            BOM dynamique
+          </button>
+</div>
+<!-- Basculeur central : Bouton segmenté [2D Vue dessus] [3D Rendu temps réel] -->
+<div class="flex items-center bg-surface-container-lowest p-0.5 rounded-DEFAULT border border-outline-variant">
+<button class="px-2 py-0.5 rounded-DEFAULT bg-primary/20 text-primary border border-primary/40 font-code-sm text-code-sm font-medium">
+            2D Vue dessus
+          </button>
+<button class="px-2 py-0.5 rounded-DEFAULT text-on-surface-variant hover:text-on-surface font-code-sm text-code-sm">
+            3D Rendu temps réel
+          </button>
+</div>
+<!-- Outils de navigation et calques -->
+<div class="flex items-center gap-2">
+<!-- Calques sélecteur rapide -->
+<div class="flex items-center gap-1 bg-surface-container px-1.5 py-0.5 rounded-DEFAULT border border-outline-variant text-code-sm font-code-sm">
+<span class="w-2 h-2 rounded-full bg-primary" title="F.Cuivre (Top Cuivre)"></span>
+<span class="text-on-surface">F.Cu</span>
+<span class="text-outline">/</span>
+<span class="w-2 h-2 rounded-full bg-[#38bdf8]" title="B.Cuivre (Bottom Cuivre)"></span>
+<span class="text-on-surface-variant">B.Cu</span>
+<span class="text-outline">/</span>
+<span class="w-2 h-2 rounded-full bg-on-surface" title="F.SilkS (Sérigraphie)"></span>
+<span class="text-on-surface-variant">Silk</span>
+</div>
+<div class="h-3.5 w-[1px] bg-outline-variant"></div>
+<!-- Zoom & Grille -->
+<div class="flex items-center gap-1 text-code-sm font-code-sm text-on-surface-variant">
+<button class="hover:text-on-surface px-1 py-0.5 rounded-DEFAULT hover:bg-surface-container">Grille: 0.50mm</button>
+<button class="hover:text-on-surface px-1 py-0.5 rounded-DEFAULT hover:bg-surface-container">100%</button>
+</div>
+<button class="p-1 rounded-DEFAULT text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Plein écran">
+<span class="material-symbols-outlined text-[15px]" data-icon="fullscreen">fullscreen</span>
+</button>
+</div>
+</div>
+<!-- GRAND CANEVAS PCB 2D VECTEUR STYLISÉ ET ULTRA DÉTAILLÉ -->
+<div class="flex-1 bg-[#090e0c] relative overflow-hidden flex items-center justify-center p-6">
+<!-- Grille millimétrique d'arrière-plan EDA -->
+<div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#4edea3 0.75px, transparent 0.75px), radial-gradient(#1e293b 0.5px, transparent 0.5px); background-size: 24px 24px, 6px 6px;"></div>
+<!-- Repères d'origine de coordonnées (X: 0.00, Y: 0.00) -->
+<div class="absolute top-3 left-4 font-code-sm text-code-sm text-outline/80 flex items-center gap-3">
+<span>X: <strong class="text-on-surface">124.50 mm</strong></span>
+<span>Y: <strong class="text-on-surface">62.80 mm</strong></span>
+<span>Rot: <strong class="text-on-surface">0°</strong></span>
+<span class="text-primary">Curseur Net: NET_3V3 (VDD)</span>
+</div>
+<!-- La Carte PCB (Substrat FR4 vert foncé haute fidélité : 54.0mm x 28.0mm) -->
+<div class="relative w-[680px] h-[360px] bg-[#0c1813] border-2 border-[#19402e] rounded-lg shadow-2xl overflow-hidden flex items-center justify-center">
+<!-- Plan de masse intérieur avec trame cuivre cuite -->
+<div class="absolute inset-0 bg-[#0c1813] opacity-95"></div>
+<!-- Lignes de cotes mécaniques / Cotation 54.0mm x 28.0mm -->
+<div class="absolute top-1 left-8 right-8 flex items-center justify-between text-[9px] font-code-sm text-outline/70 border-b border-dashed border-outline/30 pb-0.5">
+<span>|</span>
+<span class="tracking-widest">DIM: 54.00 mm (EDGE-CUTS)</span>
+<span>|</span>
+</div>
+<div class="absolute left-1 top-8 bottom-8 flex flex-col items-center justify-between text-[9px] font-code-sm text-outline/70 border-r border-dashed border-outline/30 pr-0.5">
+<span>—</span>
+<span class="rotate-90 tracking-widest text-[8px]">28.00 mm</span>
+<span>—</span>
+</div>
+<!-- 4 Trous de fixation aux angles (M2.5 avec pastilles d'or) -->
+<div class="absolute top-3.5 left-3.5 w-7 h-7 rounded-full border border-secondary/80 bg-surface-container-lowest flex items-center justify-center">
+<div class="w-3.5 h-3.5 rounded-full bg-background border border-secondary/40"></div>
+</div>
+<div class="absolute top-3.5 right-3.5 w-7 h-7 rounded-full border border-secondary/80 bg-surface-container-lowest flex items-center justify-center">
+<div class="w-3.5 h-3.5 rounded-full bg-background border border-secondary/40"></div>
+</div>
+<div class="absolute bottom-3.5 left-3.5 w-7 h-7 rounded-full border border-secondary/80 bg-surface-container-lowest flex items-center justify-center">
+<div class="w-3.5 h-3.5 rounded-full bg-background border border-secondary/40"></div>
+</div>
+<div class="absolute bottom-3.5 right-3.5 w-7 h-7 rounded-full border border-secondary/80 bg-surface-container-lowest flex items-center justify-center">
+<div class="w-3.5 h-3.5 rounded-full bg-background border border-secondary/40"></div>
+</div>
+<!-- Vias de couture (Ground stitching array) stylisés -->
+<div class="absolute inset-0 pointer-events-none p-5 flex flex-wrap gap-12 opacity-40">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary border border-secondary/80"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary border border-secondary/80"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary border border-secondary/80"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary border border-secondary/80"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary border border-secondary/80"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary border border-secondary/80"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary border border-secondary/80"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary border border-secondary/80"></div>
+</div>
+<!-- Pistes de cuivre routées (Traces SVG ultra précises avec angles 45°) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<filter height="140%" id="glow" width="140%" x="-20%" y="-20%">
+<fegaussianblur result="blur" stddeviation="1.5"></fegaussianblur>
+<fecomposite in="SourceGraphic" in2="blur" operator="over"></fecomposite>
+</filter>
+</defs>
+<!-- NET 3V3 : Piste d'alimentation élargie (0.4mm équivault 4px SVG) avec surbrillance -->
+<path d="M 125 180 L 175 180 L 195 200 L 260 200 L 290 170 L 320 170" fill="none" filter="url(#glow)" stroke="#4edea3" stroke-linecap="round" stroke-width="3"></path>
+<path d="M 260 200 L 260 230 L 280 250" fill="none" stroke="#4edea3" stroke-linecap="round" stroke-width="2.5"></path>
+<path d="M 280 250 L 315 250" fill="none" stroke="#4edea3" stroke-linecap="round" stroke-width="2"></path>
+<!-- Paire différentielle USB High-Speed D+ / D- (Routing apparié à 45 degrés) -->
+<path d="M 75 174 L 110 174 L 140 145 L 290 145 L 310 160" fill="none" stroke="#38bdf8" stroke-linejoin="round" stroke-width="1.8"></path>
+<path d="M 75 186 L 108 186 L 138 152 L 288 152 L 310 167" fill="none" stroke="#38bdf8" stroke-linejoin="round" stroke-width="1.8"></path>
+<!-- Pistes de signaux GPIO et Quartz / Horloge -->
+<path d="M 430 170 L 460 170 L 485 145 L 530 145" fill="none" stroke="#ffb77d" stroke-width="1.2"></path>
+<path d="M 430 185 L 465 185 L 490 210 L 530 210" fill="none" stroke="#ffb77d" stroke-width="1.2"></path>
+<!-- Piste Antenne RF 2.4GHz Méandre sur Top Layer -->
+<path d="M 430 200 L 470 200 L 470 240 L 485 240 L 485 200 L 500 200 L 500 240 L 515 240 L 515 200 L 540 200" fill="none" stroke="#ffd700" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<!-- COMPOSANT : J1 - CONNECTEUR USB-C (Bord gauche) -->
+<div class="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-24 bg-[#141b18] border border-outline/60 rounded-DEFAULT flex flex-col justify-between p-1 z-10">
+<span class="font-code-sm text-[8px] text-on-surface text-center font-bold tracking-tighter">J1 TYPE-C</span>
+<!-- Pastilles dorées CMS du connecteur -->
+<div class="flex flex-col gap-1 items-end pr-0.5">
+<div class="w-3.5 h-1 bg-secondary rounded-xs"></div>
+<div class="w-3.5 h-1 bg-secondary rounded-xs"></div>
+<div class="w-4 h-1.5 bg-primary rounded-xs border border-primary-fixed"></div>
+<div class="w-3.5 h-1 bg-secondary rounded-xs"></div>
+<div class="w-3.5 h-1 bg-secondary rounded-xs"></div>
+</div>
+<span class="font-code-sm text-[7px] text-outline text-center">GND/VBUS</span>
+</div>
+<!-- COMPOSANT : U2 - REGULATEUR LDO 3.3V (SOT-223 / AP2112K) -->
+<div class="absolute left-32 top-[150px] w-12 h-14 bg-[#121a16] border border-outline/70 rounded-DEFAULT p-1 flex flex-col justify-between z-10">
+<span class="font-code-sm text-[8px] text-on-surface font-semibold text-center">U2 LDO</span>
+<div class="flex justify-around">
+<div class="w-2 h-3 bg-secondary"></div>
+<div class="w-2 h-3 bg-primary"></div>
+<div class="w-2 h-3 bg-secondary"></div>
+</div>
+<span class="font-code-sm text-[7px] text-primary text-center">AP2112K</span>
+</div>
+<!-- NOUVEAUX COMPOSANTS AJOUTES PAR L'AGENT : C1 & C2 (Condensateurs de découplage) -->
+<div class="absolute left-[260px] top-[230px] p-1 bg-primary/10 border border-primary rounded-DEFAULT flex flex-col items-center gap-0.5 z-20 group cursor-pointer" title="C1 100nF (0402) - Placé par l'agent IA">
+<span class="font-code-sm text-[8px] text-primary font-bold">C1 [0402]</span>
+<div class="flex gap-0.5 items-center">
+<div class="w-2 h-3 bg-secondary border border-secondary/90"></div>
+<div class="w-2.5 h-3 bg-[#695034]"></div>
+<div class="w-2 h-3 bg-primary border border-primary"></div>
+</div>
+<span class="font-code-sm text-[7px] text-on-surface">100nF</span>
+</div>
+<div class="absolute left-[310px] top-[230px] p-1 bg-primary/10 border border-primary rounded-DEFAULT flex flex-col items-center gap-0.5 z-20 group cursor-pointer" title="C2 10µF (0805) - Placé par l'agent IA">
+<span class="font-code-sm text-[8px] text-primary font-bold">C2 [0805]</span>
+<div class="flex gap-0.5 items-center">
+<div class="w-2.5 h-4 bg-secondary border border-secondary/90"></div>
+<div class="w-4 h-4 bg-[#7a5c36]"></div>
+<div class="w-2.5 h-4 bg-primary border border-primary"></div>
+</div>
+<span class="font-code-sm text-[7px] text-on-surface">10µF</span>
+</div>
+<!-- COMPOSANT CENTRAL MAJEUR : U1 - MICROCONTROLEUR ESP32-S3 (QFN-56) -->
+<div class="absolute left-[340px] top-1/2 -translate-y-1/2 w-28 h-28 bg-[#151f1a] border-2 border-outline rounded-DEFAULT shadow-lg flex flex-col items-center justify-between p-2 z-10">
+<!-- Sérigraphie blanche composant -->
+<div class="w-full flex justify-between items-start">
+<div class="w-2 h-2 rounded-full border border-on-surface bg-on-surface/20" title="Pin 1 Index Dot"></div>
+<span class="font-code-sm text-[9px] text-on-surface font-semibold tracking-wider">U1</span>
+<span class="font-code-sm text-[8px] text-outline">QFN-56</span>
+</div>
+<!-- Logo & Marquage Puce -->
+<div class="flex flex-col items-center gap-0.5 my-auto">
+<span class="material-symbols-outlined text-outline text-[18px]" data-icon="memory">memory</span>
+<span class="font-headline-sm font-semibold text-on-surface text-[11px] tracking-tight">ESP32-S3</span>
+<span class="font-code-sm text-[7px] text-primary">Xtensa LX7 Dual-Core</span>
+</div>
+<!-- Thermal Ground Pad Exposed -->
+<div class="w-10 h-10 border border-dashed border-secondary/60 bg-secondary/10 flex items-center justify-center">
+<span class="font-code-sm text-[7px] text-secondary">GND_PAD</span>
+</div>
+</div>
+<!-- LEDs D'ETAT D1 / D2 (Indicateurs CMS) -->
+<div class="absolute left-[200px] top-10 flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-2 h-2 rounded-full bg-primary ring-2 ring-primary/40 animate-pulse"></div>
+<span class="font-code-sm text-[7px] text-on-surface">D1 (PWR)</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-2 h-2 rounded-full bg-secondary ring-1 ring-secondary/40"></div>
+<span class="font-code-sm text-[7px] text-on-surface">D2 (TXD)</span>
+</div>
+</div>
+<!-- Keepout Zone Antenne RF Sérigraphiée -->
+<div class="absolute right-5 top-14 bottom-14 w-24 border border-dashed border-tertiary-container/80 bg-tertiary-container/5 rounded-DEFAULT flex flex-col justify-between items-center p-1 pointer-events-none">
+<span class="font-code-sm text-[8px] text-tertiary tracking-tight font-medium">ANT_KEEPOUT</span>
+<div class="text-center font-code-sm text-[7px] text-on-surface-variant">
+              Zone sans cuivre<br/>3.0mm min
+            </div>
+<span class="font-code-sm text-[8px] text-tertiary font-medium">2.4 GHz RF</span>
+</div>
+<!-- Sérigraphie Logo Open-Source & Référence de la carte -->
+<div class="absolute bottom-5 left-24 font-code-sm text-[9px] text-on-surface/80 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[12px]" data-icon="terminal">terminal</span>
+<span>ESP32-S3-DevKit-ATO-REV1.2</span>
+</div>
+</div>
+<!-- Floating Quick Inspector Badge (Hover Details) -->
+<div class="absolute bottom-4 right-4 bg-surface-container-high/90 backdrop-blur border border-outline-variant p-2 rounded-DEFAULT text-code-sm font-code-sm flex flex-col gap-1 shadow-lg pointer-events-none">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-medium">Net actif : NET_3V3 (VDD3P3)</span>
+</div>
+<div class="text-outline text-[11px] space-y-0.5">
+<div>Largeur calculée : <span class="text-on-surface">0.400 mm</span> (Courant: 1.2A)</div>
+<div>Couche : <span class="text-primary">F.Cu (Top Copper 35µm)</span></div>
+<div>Dégagement règle : <span class="text-secondary">0.200 mm (Attention à 0.18mm)</span></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- ========================================================================= -->
+<!-- 3. PANNEAU INFERIEUR RETRACTABLE : DIAGNOSTIC DRC/ERC & ACTIVITE EN DIRECT -->
+<!-- ========================================================================= -->
+<section class="h-32 bg-surface-container-low border-t border-outline-variant flex divide-x divide-outline-variant flex-shrink-0 z-20">
+<!-- Moitié gauche : Vérifications DRC/ERC interactif -->
+<div class="w-1/2 flex flex-col overflow-hidden">
+<!-- En-tête statut DRC -->
+<div class="h-7 px-space-md bg-surface-container flex items-center justify-between border-b border-outline-variant/60 flex-shrink-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[15px]" data-icon="bug_report">bug_report</span>
+<span class="text-label-md font-label-md text-on-surface font-semibold">Console de Conformité DRC / ERC</span>
+</div>
+<div class="flex items-center gap-2 font-code-sm text-code-sm">
+<span class="px-1.5 py-0.2 rounded-DEFAULT bg-primary/20 text-primary border border-primary/40">
+            0 Erreurs critiques
+          </span>
+<span class="px-1.5 py-0.2 rounded-DEFAULT bg-secondary-container/20 text-secondary border border-secondary-container/40">
+            2 Avertissements DRC
+          </span>
+</div>
+</div>
+<!-- Liste des alertes et avertissements -->
+<div class="flex-1 overflow-y-auto p-1.5 space-y-1 custom-scrollbar bg-surface-container-lowest">
+<!-- Item 1 : Dégagement piste-via -->
+<div class="flex items-center justify-between p-1.5 rounded-DEFAULT bg-surface-container/60 hover:bg-surface-container border border-outline-variant/40 transition-colors">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[16px] mt-0.5" data-icon="warning">warning</span>
+<div class="font-code-sm text-code-sm">
+<span class="text-secondary font-medium">[DRC-WARN]</span>
+<span class="text-on-surface"> Dégagement piste-via à 0.18mm (Recommandé: 0.20mm) sur net </span>
+<span class="text-primary font-semibold">NET_3V3</span>
+</div>
+</div>
+<button class="px-2 py-0.5 bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold rounded-DEFAULT hover:brightness-110 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="auto_fix_high">auto_fix_high</span>
+            Corriger auto
+          </button>
+</div>
+<!-- Item 2 : Broche GPIO flottante -->
+<div class="flex items-center justify-between p-1.5 rounded-DEFAULT bg-surface-container/40 hover:bg-surface-container border border-outline-variant/40 transition-colors">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-outline text-[16px] mt-0.5" data-icon="info">info</span>
+<div class="font-code-sm text-code-sm">
+<span class="text-outline font-medium">[ERC-INFO]</span>
+<span class="text-on-surface-variant"> Broche GPIO0 flottante avec pull-up interne activé (Bootstrap bootloader)</span>
+</div>
+</div>
+<span class="font-code-sm text-[10px] text-outline px-1.5 py-0.5">Toléré</span>
+</div>
+</div>
+</div>
+<!-- Moitié droite : Journal d'actions en direct de l'agent IA -->
+<div class="w-1/2 flex flex-col overflow-hidden">
+<!-- En-tête logs et étape active -->
+<div class="h-7 px-space-md bg-surface-container flex items-center justify-between border-b border-outline-variant/60 flex-shrink-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[15px]" data-icon="terminal">terminal</span>
+<span class="text-label-md font-label-md text-on-surface font-semibold">Journal d'actions en direct (ATO-Engine)</span>
+</div>
+<!-- Étape active & progression -->
+<div class="flex items-center gap-2">
+<span class="font-code-sm text-code-sm text-on-surface-variant">Routage différentiel USB : 94%</span>
+<div class="w-20 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-300" style="width: 94%"></div>
+</div>
+</div>
+</div>
+<!-- Console logs temps réel -->
+<div class="flex-1 overflow-y-auto p-2 font-code-sm text-code-sm space-y-0.5 bg-surface-container-lowest custom-scrollbar text-on-surface-variant">
+<div class="flex items-center gap-2 text-outline">
+<span class="text-outline/70">14:28:02</span>
+<span class="text-primary">[ATO-ENGINE]</span>
+<span>Compilation AST ast.ato réussie en 140ms. Arbre de 38 composants résolu.</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline/70">14:28:05</span>
+<span class="text-secondary">[ROUTER]</span>
+<span class="text-on-surface">18 filets routés avec succès (Top/Bottom copper), 0 conflit topologique.</span>
+</div>
+<div class="flex items-center gap-2 text-primary">
+<span class="text-outline/70">14:28:09</span>
+<span>[AI-COPILOT]</span>
+<span>Insertion de C1 (100nF) &amp; C2 (10µF) synchronisée avec schéma PCB.</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- 4. BARRE DE STATUT GLOBALE DU PROJET (Bottom Bar)                         -->
+<!-- ========================================================================= -->
+<footer class="h-7 bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between px-space-md font-code-sm text-code-sm text-on-surface-variant flex-shrink-0 z-30">
+<!-- Stepper d'avancement du cycle de vie matériel -->
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[13px]" data-icon="check_circle">check_circle</span>
+<span>1. Brouillon</span>
+</div>
+<span class="text-outline">→</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[13px]" data-icon="check_circle">check_circle</span>
+<span>2. Schéma validé</span>
+</div>
+<span class="text-outline">→</span>
+<div class="flex items-center gap-1 text-on-surface font-semibold bg-surface-container px-1 rounded-DEFAULT border border-outline-variant/60">
+<span class="w-1.5 h-1.5 rounded-full bg-primary status-pulse"></span>
+<span>3. PCB vérifié (En cours)</span>
+</div>
+<span class="text-outline">→</span>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[13px]" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span>4. Exporté</span>
+</div>
+</div>
+<!-- Informations système, Git & Consommation LLM -->
+<div class="flex items-center gap-4">
+<!-- Compteur de ressources LLM -->
+<div class="flex items-center gap-1" title="Consommation de tokens d'inférence">
+<span class="material-symbols-outlined text-outline text-[13px]" data-icon="toll">toll</span>
+<span>Jetons utilisés : <strong class="text-on-surface">14,250 tokens</strong> (~0.04 €)</span>
+</div>
+<div class="h-3 w-[1px] bg-outline-variant"></div>
+<!-- Branche Git -->
+<div class="flex items-center gap-1 text-on-surface hover:text-primary transition-colors cursor-pointer" title="Branche de travail actuelle">
+<span class="material-symbols-outlined text-[13px]" data-icon="fork_right">fork_right</span>
+<span>feat/power-decoupling <span class="text-outline">(3 non poussés)</span></span>
+</div>
+<div class="h-3 w-[1px] bg-outline-variant"></div>
+<!-- Bouton d'action proactif d'étape -->
+<button class="h-5 px-2 rounded-DEFAULT bg-primary/20 hover:bg-primary/30 border border-primary/50 text-primary font-medium flex items-center gap-1 transition-colors">
+<span>Valider l'étape PCB</span>
+<span class="material-symbols-outlined text-[12px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</footer>
+</body></html>

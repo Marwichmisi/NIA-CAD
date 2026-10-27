@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atopile PCB Studio • Variante B Studio Central</title>
+<!-- Material Symbols Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts: Geist / JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-fixed": "#6ffbbe",
+            "surface-container-lowest": "#0b0f12",
+            "surface-container-high": "#262a2e",
+            "on-tertiary-fixed": "#410004",
+            "surface-dim": "#101417",
+            "on-tertiary-container": "#79000e",
+            "on-secondary-container": "#432100",
+            "on-background": "#e0e3e7",
+            "background": "#101417",
+            "inverse-on-surface": "#2d3134",
+            "surface-variant": "#313539",
+            "surface": "#101417",
+            "on-primary-container": "#00422b",
+            "on-primary-fixed": "#002113",
+            "surface-container-highest": "#313539",
+            "on-surface-variant": "#bbcabf",
+            "tertiary-fixed-dim": "#ffb3ad",
+            "surface-container": "#1c2023",
+            "on-secondary": "#4d2600",
+            "on-tertiary": "#68000a",
+            "tertiary": "#ffb3ad",
+            "surface-bright": "#363a3d",
+            "on-primary": "#003824",
+            "outline": "#86948a",
+            "on-secondary-fixed": "#2f1500",
+            "surface-container-low": "#181c1f",
+            "surface-tint": "#4edea3",
+            "on-surface": "#e0e3e7",
+            "secondary-container": "#d97707",
+            "primary-container": "#10b981",
+            "secondary": "#ffb77d",
+            "error": "#ffb4ab",
+            "on-tertiary-fixed-variant": "#930013",
+            "on-primary-fixed-variant": "#005236",
+            "inverse-primary": "#006c49",
+            "secondary-fixed-dim": "#ffb77d",
+            "on-error-container": "#ffdad6",
+            "tertiary-container": "#ff7a73",
+            "primary-fixed-dim": "#4edea3",
+            "on-secondary-fixed-variant": "#6e3900",
+            "tertiary-fixed": "#ffdad7",
+            "secondary-fixed": "#ffdcc3",
+            "outline-variant": "#3c4a42",
+            "error-container": "#93000a",
+            "inverse-surface": "#e0e3e7",
+            "on-error": "#690005",
+            "primary": "#4edea3"
+          },
+          borderRadius: {
+            DEFAULT: "0.125rem",
+            lg: "0.25rem",
+            xl: "0.5rem",
+            full: "0.75rem"
+          },
+          spacing: {
+            "space-md": "0.75rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.375rem",
+            "space-lg": "1rem",
+            "margin": "1rem",
+            "space-xl": "1.5rem",
+            "gutter": "0.75rem"
+          },
+          fontFamily: {
+            "body-md": ["Geist", "sans-serif"],
+            "code-md": ["JetBrains Mono", "monospace"],
+            "label-md": ["JetBrains Mono", "monospace"],
+            "label-sm": ["JetBrains Mono", "monospace"],
+            "headline-md": ["Geist", "sans-serif"],
+            "body-sm": ["Geist", "sans-serif"],
+            "headline-sm": ["Geist", "sans-serif"],
+            "headline-lg": ["Geist", "sans-serif"],
+            "body-lg": ["Geist", "sans-serif"],
+            "code-sm": ["JetBrains Mono", "monospace"]
+          },
+          fontSize: {
+            "body-md": ["0.875rem", { lineHeight: "1.25rem", letterSpacing: "0em", fontWeight: "400" }],
+            "code-md": ["0.8125rem", { lineHeight: "1.25rem", letterSpacing: "-0.01em", fontWeight: "400" }],
+            "label-md": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.02em", fontWeight: "500" }],
+            "label-sm": ["0.625rem", { lineHeight: "0.875rem", letterSpacing: "0.04em", fontWeight: "600" }],
+            "headline-md": ["1.25rem", { lineHeight: "1.75rem", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "body-sm": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0em", fontWeight: "400" }],
+            "headline-sm": ["1rem", { lineHeight: "1.5rem", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-lg": ["1.5rem", { lineHeight: "2rem", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "body-lg": ["0.9375rem", { lineHeight: "1.5rem", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "code-sm": ["0.6875rem", { lineHeight: "1rem", letterSpacing: "0em", fontWeight: "400" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Subtle CAD grid pattern */
+    .cad-grid {
+      background-color: #0b0f12;
+      background-image: 
+        radial-gradient(rgba(134, 148, 138, 0.18) 1px, transparent 1px),
+        radial-gradient(rgba(134, 148, 138, 0.08) 1px, transparent 1px);
+      background-size: 20px 20px, 4px 4px;
+      background-position: 0 0, 0 0;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0f12;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #313539;
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #86948a;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-hidden select-none h-screen w-screen flex flex-col font-body-md">
+<!-- ========================================================================= -->
+<!-- 1. BARRE D'EN-TÊTE SUPÉRIEURE COMPACTE (TopNavBar docked left-12 h-10)     -->
+<!-- ========================================================================= -->
+<header class="fixed top-0 left-12 right-0 z-30 h-10 flex items-center justify-between px-3 bg-surface-container-lowest border-b border-outline-variant">
+<!-- Section Gauche : Logo, Titre Projet, Pastille LLM -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="memory">memory</span>
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-bold">Atopile PCB Studio</span>
+<span class="text-outline-variant">•</span>
+<span class="font-code-md text-code-md text-primary font-medium">ESP32-S3-AudioNode</span>
+</div>
+<!-- Pastille LLM Local Ollama -->
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container border border-outline-variant text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span>Local LLM : Qwen2.5-Coder (Ollama)</span>
+</div>
+</div>
+<!-- Navigation Centrale des Vues (TopNavBar Links de l'ancre) -->
+<nav class="hidden lg:flex items-center space-x-1 h-full">
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors duration-100 font-label-md text-label-md py-2 px-2.5 rounded-sm">
+        Schéma Synoptique
+      </button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors duration-100 font-label-md text-label-md py-2 px-2.5 rounded-sm flex items-center gap-1">
+<span>Code .ato</span>
+<span class="px-1 py-0.2 text-[9px] bg-surface-container-highest rounded text-on-surface-variant font-code-sm">v0.9</span>
+</button>
+<button class="text-on-surface border-b-2 border-primary bg-surface-container-high font-label-md text-label-md py-2 px-3 flex items-center gap-1.5 font-semibold text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>PCB 2D Stylisé</span>
+<span class="text-[10px] text-primary-fixed bg-surface-container px-1 rounded">(Actif)</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors duration-100 font-label-md text-label-md py-2 px-2.5 rounded-sm">
+        BOM Dynamique
+      </button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors duration-100 font-label-md text-label-md py-2 px-2.5 rounded-sm flex items-center gap-1">
+<span>Règles DRC/ERC</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+</button>
+</nav>
+<!-- Contrôles PCB & Actions Rapides à Droite -->
+<div class="flex items-center gap-2">
+<!-- Sélecteur de Calques Compacts -->
+<div class="hidden xl:flex items-center gap-1 bg-surface-container-low px-1.5 py-0.5 rounded border border-outline-variant font-code-sm text-code-sm">
+<button class="px-1.5 py-0.5 rounded text-primary-fixed bg-primary-container/20 border border-primary text-[10px] font-semibold flex items-center gap-1" title="Top Copper">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>F.Cu
+        </button>
+<button class="px-1.5 py-0.5 rounded text-cyan-300 hover:bg-surface-container text-[10px] flex items-center gap-1" title="Bottom Copper">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>B.Cu
+        </button>
+<button class="px-1.5 py-0.5 rounded text-on-surface-variant hover:bg-surface-container text-[10px] flex items-center gap-1" title="Top Silkscreen">
+<span class="w-1.5 h-1.5 rounded-full bg-white"></span>Silk
+        </button>
+<button class="px-1.5 py-0.5 rounded text-amber-400 hover:bg-surface-container text-[10px] flex items-center gap-1" title="Bord de carte / Coupe">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Edge
+        </button>
+</div>
+<!-- Grille & Zoom -->
+<div class="flex items-center gap-1 text-on-surface-variant font-code-sm text-code-sm">
+<button class="px-2 py-1 bg-surface-container border border-outline-variant hover:border-outline text-on-surface rounded text-[11px] flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="grid_4x4">grid_4x4</span>
+<span>Grille 0.50mm</span>
+</button>
+<span class="px-1.5 py-1 text-[11px] text-on-surface-variant font-code-sm">100%</span>
+</div>
+<!-- Bouton Export Gerber / Fabrication -->
+<button class="px-2.5 py-1 bg-surface-container-high border border-outline-variant hover:border-primary text-on-surface hover:text-primary rounded font-label-md text-label-md flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[15px]" data-icon="precision_manufacturing">precision_manufacturing</span>
+<span class="hidden sm:inline">Export Gerber</span>
+</button>
+<!-- Toggle Tiroir IA Copilote -->
+<button class="px-2.5 py-1 bg-primary text-on-primary-container font-label-md text-label-md font-semibold rounded flex items-center gap-1.5 shadow-sm hover:brightness-105 transition-all" id="toggle-copilot-btn">
+<span class="material-symbols-outlined text-[16px]" data-icon="smart_toy">smart_toy</span>
+<span>Copilote IA</span>
+<span class="text-[10px] px-1 py-0.2 bg-on-primary-container/20 rounded font-code-sm">Alt+K</span>
+</button>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- 2. RAIL LATÉRAL GAUCHE ULTRA-FIN (SideNavBar docked left-0 w-12)          -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-0 bottom-0 z-40 w-12 flex flex-col items-center py-2 bg-surface-container-low border-r border-outline-variant justify-between">
+<!-- En-tête Rail : Logo / Branding -->
+<div class="flex flex-col items-center gap-3 w-full">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary font-bold text-headline-sm" title="Logo Atopile PCB Studio circuit imprimé">
+<span class="material-symbols-outlined text-[20px]" data-icon="bolt">bolt</span>
+</div>
+<!-- Outils d'Édition Rapide (CAO PCB) -->
+<div class="flex flex-col items-center gap-1 w-full pt-1">
+<button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Sélection [S]">
+<span class="material-symbols-outlined" data-icon="near_me">near_me</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded text-primary border-l-2 border-primary bg-surface-container-high" title="Tracé de piste active [W]">
+<span class="material-symbols-outlined text-primary" data-icon="polyline">polyline</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Placer Via [V]">
+<span class="material-symbols-outlined" data-icon="adjust">adjust</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Règle et Mesure [M]">
+<span class="material-symbols-outlined" data-icon="straighten">straighten</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Inspection couches [L]">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+</button>
+</div>
+<!-- Séparateur vertical -->
+<div class="w-6 h-[1px] bg-outline-variant/60 my-1"></div>
+<!-- Étapes du Workflow en pastilles verticales numérotées -->
+<div class="flex flex-col items-center gap-2 w-full">
+<!-- Étape 1 : Schéma Valide -->
+<div class="relative group cursor-pointer" title="1. Schéma (Validé)">
+<div class="w-6 h-6 rounded-full bg-primary-container/20 border border-primary text-primary flex items-center justify-center text-[10px] font-code-sm font-semibold">
+            1
+          </div>
+<span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary ring-2 ring-surface-container-low"></span>
+</div>
+<!-- Étape 2 : Placement Valide -->
+<div class="relative group cursor-pointer" title="2. Placement (Validé)">
+<div class="w-6 h-6 rounded-full bg-primary-container/20 border border-primary text-primary flex items-center justify-center text-[10px] font-code-sm font-semibold">
+            2
+          </div>
+<span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary ring-2 ring-surface-container-low"></span>
+</div>
+<!-- Étape 3 : Routage Actif (Pastille verte pulsante) -->
+<div class="relative group cursor-pointer" title="3. Routage actif (En cours)">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary-container font-code-sm font-bold flex items-center justify-center text-[11px] shadow-[0_0_8px_rgba(16,185,129,0.5)]">
+            3
+          </div>
+<span class="absolute top-0 right-0 w-2 h-2 rounded-full bg-white animate-ping"></span>
+</div>
+<!-- Étape 4 : DRC En attente -->
+<div class="group cursor-pointer" title="4. DRC / ERC">
+<div class="w-6 h-6 rounded-full bg-surface-container border border-outline-variant text-on-surface-variant flex items-center justify-center text-[10px] font-code-sm">
+            4
+          </div>
+</div>
+<!-- Étape 5 : Export -->
+<div class="group cursor-pointer" title="5. Export &amp; Fabrication">
+<div class="w-6 h-6 rounded-full bg-surface-container border border-outline-variant text-on-surface-variant flex items-center justify-center text-[10px] font-code-sm">
+            5
+          </div>
+</div>
+</div>
+</div>
+<!-- Pied de Rail : Validation Étape & Réglages -->
+<div class="flex flex-col items-center gap-2 w-full">
+<!-- Bouton Validation d'Étape -->
+<button class="w-8 h-8 rounded bg-surface-container border border-primary/50 hover:bg-primary-container hover:text-on-primary-container text-primary flex items-center justify-center transition-colors group relative" title="Valider l'étape de routage [Ctrl+Enter]">
+<span class="material-symbols-outlined text-[18px]" data-icon="check">check</span>
+<!-- Tooltip simple -->
+<span class="absolute left-10 ml-1 px-2 py-0.5 bg-surface-container-highest text-on-surface rounded text-[10px] whitespace-nowrap hidden group-hover:block font-code-sm z-50 border border-outline-variant">
+          Valider Routage (Ctrl+↵)
+        </span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Logs Console">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Paramètres">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- ZONE PRINCIPALE DE L'APPLICATION (Dock central + Tiroir Copilote IA)     -->
+<!-- ========================================================================= -->
+<div class="flex-1 flex overflow-hidden pl-12 pt-10 pb-7">
+<!-- ======================================================================= -->
+<!-- 3. ESPACE CENTRAL IMMERSIF : STUDIO PCB 2D VUE HAUTE FIDÉLITÉ           -->
+<!-- ======================================================================= -->
+<main class="flex-1 relative cad-grid overflow-hidden flex items-center justify-center">
+<!-- Mini Boîte à Outils Flottante (HUD Top-Center) -->
+<div class="absolute top-3 z-20 flex items-center gap-1 px-2 py-1 bg-surface-container-lowest/90 backdrop-blur border border-outline-variant rounded-md shadow-lg">
+<button class="flex items-center gap-1 px-2 py-1 rounded bg-primary text-on-primary-container text-label-sm font-label-sm font-semibold">
+<span class="material-symbols-outlined text-[15px]" data-icon="polyline">polyline</span>
+<span>Piste [W]</span>
+</button>
+<button class="flex items-center gap-1 px-2 py-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[15px]" data-icon="adjust">adjust</span>
+<span>Via [V]</span>
+</button>
+<button class="flex items-center gap-1 px-2 py-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[15px]" data-icon="straighten">straighten</span>
+<span>Règle [M]</span>
+</button>
+<button class="flex items-center gap-1 px-2 py-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[15px]" data-icon="tune">tune</span>
+<span>Ajuster [E]</span>
+</button>
+<div class="w-[1px] h-4 bg-outline-variant mx-1"></div>
+<span class="font-code-sm text-code-sm text-on-surface-variant text-[11px] px-1">L1: F.Cu (0.035mm)</span>
+</div>
+<!-- LE PCB PRINCIPAL RENDU VECTORIELLEMENT (Style Noir Mat & Masque Solder Vert / Cuivre) -->
+<div class="relative w-[780px] h-[520px] bg-[#0c1613] rounded-2xl border-2 border-[#10b981]/50 shadow-[0_0_50px_rgba(0,0,0,0.85)] p-4 select-none">
+<!-- Motif Plan de Masse Haché / Cuivre sous-jacent -->
+<svg class="absolute inset-0 w-full h-full rounded-2xl pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern height="8" id="gnd-hatch" patterntransform="rotate(45 0 0)" patternunits="userSpaceOnUse" width="8">
+<line opacity="0.35" stroke="#16382b" stroke-width="0.8" x1="0" x2="0" y1="0" y2="8"></line>
+</pattern>
+<!-- Lueur d'alerte DRC -->
+<filter height="160%" id="glow-error" width="160%" x="-30%" y="-30%">
+<fegaussianblur result="blur" stddeviation="3"></fegaussianblur>
+<fecomposite in="SourceGraphic" in2="blur" operator="over"></fecomposite>
+</filter>
+</defs>
+<rect fill="url(#gnd-hatch)" height="100%" rx="16" width="100%"></rect>
+</svg>
+<!-- 4 Trous de Montage M3 Plaqués Cuivre & Or (Coins) -->
+<!-- Haut Gauche -->
+<div class="absolute top-5 left-5 w-8 h-8 rounded-full bg-[#181c1f] border-4 border-[#d97707] flex items-center justify-center shadow-inner">
+<div class="w-3.5 h-3.5 rounded-full bg-[#090d10] border border-outline-variant"></div>
+</div>
+<!-- Haut Droit -->
+<div class="absolute top-5 right-5 w-8 h-8 rounded-full bg-[#181c1f] border-4 border-[#d97707] flex items-center justify-center shadow-inner">
+<div class="w-3.5 h-3.5 rounded-full bg-[#090d10] border border-outline-variant"></div>
+</div>
+<!-- Bas Gauche -->
+<div class="absolute bottom-5 left-5 w-8 h-8 rounded-full bg-[#181c1f] border-4 border-[#d97707] flex items-center justify-center shadow-inner">
+<div class="w-3.5 h-3.5 rounded-full bg-[#090d10] border border-outline-variant"></div>
+</div>
+<!-- Bas Droit -->
+<div class="absolute bottom-5 right-5 w-8 h-8 rounded-full bg-[#181c1f] border-4 border-[#d97707] flex items-center justify-center shadow-inner">
+<div class="w-3.5 h-3.5 rounded-full bg-[#090d10] border border-outline-variant"></div>
+</div>
+<!-- Sérigraphie Silkscreen Blanche Pure -->
+<div class="absolute top-6 left-16 text-white/90 font-code-sm text-[11px] font-bold tracking-widest pointer-events-none">
+          ATOLABS • ESP32-S3-AUDIONODE • REV 0.4
+        </div>
+<div class="absolute bottom-6 right-16 text-white/70 font-code-sm text-[10px] tracking-wide pointer-events-none">
+          DESIGNED WITH ATOPILE DSL • 4-LAYER STACKUP
+        </div>
+<!-- Zone d'exclusion RF / Antenne Silk Screen -->
+<div class="absolute top-6 right-20 w-36 h-20 border border-dashed border-amber-400/60 rounded p-1 pointer-events-none">
+<div class="w-full h-full bg-amber-500/5 flex flex-col items-center justify-center text-center">
+<span class="text-amber-300 font-code-sm text-[9px] font-bold tracking-wider">ANT_KEEPOUT</span>
+<span class="text-amber-400/80 font-code-sm text-[8px]">2.4GHz RF MEANDER</span>
+<div class="w-20 h-3 border-b-2 border-r-2 border-amber-400 mt-1"></div>
+</div>
+</div>
+<!-- PISTES VECTORIELLES DU PCB (Traces Cuivrées F.Cu et B.Cu) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<!-- Traces Couche Inférieure B.Cu (Cyan) -->
+<g fill="none" opacity="0.65" stroke="#06b6d4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+<path d="M 230 260 L 230 330 L 310 330 L 340 360"></path>
+<path d="M 240 280 L 240 340 L 300 340"></path>
+<path d="M 460 270 L 520 270 L 550 300"></path>
+</g>
+<!-- Traces Couche Supérieure F.Cu (Vert Émeraude Lumineux #10b981) -->
+<!-- Piste de Puissance VDD 3.3V (Plus large 0.5mm / stroke 4) -->
+<path d="M 140 230 L 200 230 L 240 270 L 320 270" fill="none" opacity="0.95" stroke="#10b981" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.2"></path>
+<!-- Méandres Accord de Longueur D+ / D- USB-C -->
+<path d="M 115 200 L 140 200 L 145 195 L 150 205 L 155 195 L 160 205 L 165 200 L 210 200 L 250 240 L 320 240" fill="none" stroke="#34d399" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<path d="M 115 208 L 138 208 L 143 203 L 148 213 L 153 203 L 158 213 L 163 208 L 208 208 L 248 248 L 320 248" fill="none" stroke="#4edea3" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<!-- Pistes Signaux Périphériques -->
+<g fill="none" stroke="#10b981" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+<path d="M 440 230 L 530 230 L 570 190"></path>
+<path d="M 440 240 L 510 240 L 550 280 L 620 280"></path>
+<path d="M 440 250 L 490 250 L 530 330"></path>
+<path d="M 380 320 L 380 400 L 440 400"></path>
+<path d="M 360 320 L 360 380 L 280 380 L 280 420"></path>
+</g>
+<!-- Vias Traversants (Pads Cuivre avec trou central) -->
+<g fill="#d97707" stroke="#10b981" stroke-width="0.8">
+<circle cx="200" cy="230" r="3.5"></circle><circle cx="200" cy="230" fill="#090d10" r="1.5"></circle>
+<circle cx="310" cy="330" r="3.5"></circle><circle cx="310" cy="330" fill="#090d10" r="1.5"></circle>
+<circle cx="520" cy="270" r="3.5"></circle><circle cx="520" cy="270" fill="#090d10" r="1.5"></circle>
+<circle cx="490" cy="250" r="3.5"></circle><circle cx="490" cy="250" fill="#090d10" r="1.5"></circle>
+</g>
+</svg>
+<!-- COMPOSANTS ÉLECTRONIQUES IMPLANTÉS (Absolute Placement) -->
+<!-- 1. J1 : Connecteur USB-C (Bord gauche) -->
+<div class="absolute top-[185px] left-6 w-16 h-12 bg-[#1b2520] border-2 border-outline rounded-sm p-1 shadow-md">
+<div class="w-full h-full border border-dashed border-white/40 flex items-center justify-between px-1">
+<div class="flex flex-col gap-1">
+<span class="w-2.5 h-1 bg-[#d97707] rounded-xs"></span>
+<span class="w-2.5 h-1 bg-[#10b981] rounded-xs"></span>
+<span class="w-2.5 h-1 bg-[#10b981] rounded-xs"></span>
+<span class="w-2.5 h-1 bg-[#d97707] rounded-xs"></span>
+</div>
+<span class="font-code-sm text-[9px] text-white/80 font-bold rotate-90">J1 USB-C</span>
+<div class="w-1.5 h-7 bg-[#2d3134] rounded-xs"></div>
+</div>
+<span class="absolute -top-4 left-0 font-code-sm text-[9px] text-white/70">J1</span>
+</div>
+<!-- 2. U2 : Régulateur LDO 3.3V SOT-23-5 -->
+<div class="absolute top-[215px] left-[175px] w-12 h-9 bg-[#111714] border border-outline rounded-xs flex items-center justify-center p-0.5">
+<!-- Pins SOT-23-5 -->
+<div class="absolute -top-1.5 left-1 w-2 h-1.5 bg-[#d97707] rounded-xs"></div>
+<div class="absolute -top-1.5 right-1 w-2 h-1.5 bg-[#d97707] rounded-xs"></div>
+<div class="absolute -bottom-1.5 left-1 w-2 h-1.5 bg-[#d97707] rounded-xs"></div>
+<div class="absolute -bottom-1.5 left-5 w-2 h-1.5 bg-[#d97707] rounded-xs"></div>
+<div class="absolute -bottom-1.5 right-1 w-2 h-1.5 bg-[#d97707] rounded-xs"></div>
+<span class="font-code-sm text-[8px] text-primary-fixed font-bold">U2 LDO</span>
+<span class="absolute -top-4 left-0 font-code-sm text-[9px] text-white/70">U2 [3.3V]</span>
+</div>
+<!-- Condensateurs de Découplage C1 (0402) et C2 (0805) -->
+<div class="absolute top-[180px] left-[210px] w-6 h-3 bg-[#1e2321] border border-outline-variant flex items-center justify-between px-0.5" title="C1 100nF 0402">
+<div class="w-1.5 h-full bg-[#d97707]"></div>
+<span class="text-[7px] font-code-sm text-white/70">C1</span>
+<div class="w-1.5 h-full bg-[#d97707]"></div>
+</div>
+<div class="absolute top-[250px] left-[165px] w-8 h-4 bg-[#1e2321] border border-outline-variant flex items-center justify-between px-0.5" title="C2 10uF 0805">
+<div class="w-2 h-full bg-[#d97707]"></div>
+<span class="text-[8px] font-code-sm text-white/70">C2</span>
+<div class="w-2 h-full bg-[#d97707]"></div>
+</div>
+<!-- 3. U1 : Microcontrôleur Central QFN ESP32-S3 -->
+<div class="absolute top-[180px] left-[320px] w-32 h-32 bg-[#090d10] border-2 border-outline rounded-sm flex flex-col items-center justify-center p-2 shadow-2xl">
+<!-- Repère Pin 1 Silkscreen -->
+<div class="absolute top-1.5 left-1.5 w-1.5 h-1.5 rounded-full bg-white"></div>
+<!-- Thermal Pad Central Exposé avec Via Array 2x2 -->
+<div class="w-16 h-16 bg-[#b45309] rounded border border-[#d97707] flex flex-col items-center justify-center relative">
+<span class="font-code-sm text-[8px] text-black font-extrabold uppercase tracking-wider">EPAD GND</span>
+<!-- Via Array 2x2 thermique -->
+<div class="grid grid-cols-2 gap-3 mt-1">
+<div class="w-2 h-2 rounded-full bg-[#090d10] border border-[#d97707]"></div>
+<div class="w-2 h-2 rounded-full bg-[#090d10] border border-[#d97707]"></div>
+<div class="w-2 h-2 rounded-full bg-[#090d10] border border-[#d97707]"></div>
+<div class="w-2 h-2 rounded-full bg-[#090d10] border border-[#d97707]"></div>
+</div>
+</div>
+<!-- Sérigraphie Puce -->
+<div class="mt-1 text-center">
+<span class="font-code-sm text-[9px] text-white font-bold block">ESPRESSIF</span>
+<span class="font-code-sm text-[8px] text-primary block">ESP32-S3-WROOM</span>
+</div>
+<!-- Sérigraphie Repère U1 -->
+<span class="absolute -top-4 left-0 font-code-sm text-[10px] text-white font-bold">U1</span>
+<!-- QFN Perimeter Pads (simulation graphique des pastilles de soudure) -->
+<!-- Gauche -->
+<div class="absolute -left-2 top-3 bottom-3 flex flex-col justify-between py-1">
+<span class="w-2 h-1 bg-[#d97707] rounded-xs"></span>
+<span class="w-2 h-1 bg-[#10b981] rounded-xs"></span>
+<span class="w-2 h-1 bg-[#10b981] rounded-xs"></span>
+<span class="w-2 h-1 bg-[#d97707] rounded-xs"></span>
+<span class="w-2 h-1 bg-[#d97707] rounded-xs"></span>
+</div>
+<!-- Droite -->
+<div class="absolute -right-2 top-3 bottom-3 flex flex-col justify-between py-1">
+<span class="w-2 h-1 bg-[#10b981] rounded-xs"></span>
+<span class="w-2 h-1 bg-[#10b981] rounded-xs"></span>
+<span class="w-2 h-1 bg-[#d97707] rounded-xs"></span>
+<span class="w-2 h-1 bg-[#10b981] rounded-xs"></span>
+<span class="w-2 h-1 bg-[#d97707] rounded-xs"></span>
+</div>
+<!-- Haut -->
+<div class="absolute -top-2 left-4 right-4 flex justify-between px-1">
+<span class="w-1 h-2 bg-[#d97707] rounded-xs"></span>
+<span class="w-1 h-2 bg-[#10b981] rounded-xs"></span>
+<span class="w-1 h-2 bg-[#10b981] rounded-xs"></span>
+<span class="w-1 h-2 bg-[#d97707] rounded-xs"></span>
+</div>
+<!-- Bas -->
+<div class="absolute -bottom-2 left-4 right-4 flex justify-between px-1">
+<span class="w-1 h-2 bg-[#10b981] rounded-xs"></span>
+<span class="w-1 h-2 bg-[#d97707] rounded-xs"></span>
+<span class="w-1 h-2 bg-[#10b981] rounded-xs"></span>
+<span class="w-1 h-2 bg-[#d97707] rounded-xs"></span>
+</div>
+</div>
+<!-- Diodes de Statut D1, D2 (0603) -->
+<div class="absolute bottom-16 left-[380px] flex items-center gap-3">
+<div class="w-5 h-3 bg-[#111714] border border-outline-variant flex items-center justify-between px-0.5">
+<span class="w-1 h-full bg-[#10b981]"></span>
+<span class="text-[7px] font-code-sm text-primary">D1</span>
+<span class="w-1 h-full bg-[#d97707]"></span>
+</div>
+<div class="w-5 h-3 bg-[#111714] border border-outline-variant flex items-center justify-between px-0.5">
+<span class="w-1 h-full bg-[#38bdf8]"></span>
+<span class="text-[7px] font-code-sm text-sky-400">D2</span>
+<span class="w-1 h-full bg-[#d97707]"></span>
+</div>
+</div>
+<!-- =================================================================== -->
+<!-- SURLIGNAGE D'ERREUR DRC VISIBLE DIRECTEMENT SUR LE PCB              -->
+<!-- =================================================================== -->
+<!-- Cercle d'alerte pulsant ambre/rouge sur le dégagement piste-via -->
+<div class="absolute top-[215px] left-[188px] z-30">
+<div class="relative flex items-center justify-center">
+<!-- Pulsation lumineuse -->
+<span class="absolute w-8 h-8 rounded-full bg-secondary-container/30 animate-ping"></span>
+<span class="w-6 h-6 rounded-full border-2 border-secondary-container bg-surface-container-lowest/80 flex items-center justify-center text-secondary font-bold text-[11px] shadow-lg">
+              !
+            </span>
+</div>
+<!-- Callout DRC interactif -->
+<div class="absolute left-7 -top-4 w-64 bg-surface-container-lowest border border-secondary-container rounded p-2 shadow-2xl z-40 backdrop-blur">
+<div class="flex items-center justify-between pb-1 border-b border-outline-variant">
+<span class="text-[10px] font-code-sm text-secondary font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                DRC-W01: Dégagement Piste-Via
+              </span>
+<span class="text-[9px] font-code-sm text-on-surface-variant">0.185mm &lt; 0.200mm</span>
+</div>
+<p class="text-body-sm text-body-sm text-on-surface-variant mt-1 text-[11px] leading-tight">
+              Distance critique entre le bus 3.3V et le via GND sous l'inductance.
+            </p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-[9px] font-code-sm text-outline">Net: NET_3V3</span>
+<button class="px-2 py-0.5 rounded bg-primary text-on-primary-container font-label-sm text-label-sm font-semibold hover:brightness-110 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="auto_fix_high">auto_fix_high</span>
+<span>Corriger par l'IA</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Overlay HUD d'informations curseur (Bas-Gauche du canvas) -->
+<div class="absolute bottom-3 left-4 z-20 flex items-center gap-3 px-3 py-1.5 bg-surface-container-lowest/90 border border-outline-variant rounded font-code-sm text-code-sm text-on-surface-variant backdrop-blur">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="text-outline">X:</span>
+<span class="text-primary font-medium">52.40mm</span>
+<span class="text-outline ml-1">Y:</span>
+<span class="text-primary font-medium">31.20mm</span>
+</div>
+<div class="w-[1px] h-3 bg-outline-variant"></div>
+<div class="flex items-center gap-1.5">
+<span class="text-outline">Net actif:</span>
+<span class="text-on-surface font-semibold bg-surface-container px-1 rounded text-primary">NET_3V3</span>
+</div>
+<div class="w-[1px] h-3 bg-outline-variant"></div>
+<div class="text-[11px] flex items-center gap-2 text-outline">
+<span>Courant max: <strong class="text-on-surface font-normal">1.2A</strong></span>
+<span>Chute de tension: <strong class="text-on-surface font-normal">12mV</strong></span>
+</div>
+</div>
+</main>
+<!-- ======================================================================= -->
+<!-- 4. TIROIR LATÉRAL DROIT : COPILOTE MATÉRIEL IA & JOURNAL D'ACTIONS      -->
+<!-- ======================================================================= -->
+<aside class="w-[380px] bg-surface-container-low border-l border-outline-variant flex flex-col justify-between z-20 transition-all duration-200" id="copilot-drawer">
+<!-- En-tête Tiroir IA -->
+<div class="p-3 border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<h2 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Copilote Matériel IA</h2>
+<span class="px-1.5 py-0.2 rounded bg-primary-container/20 text-primary font-label-sm text-label-sm">En écoute</span>
+</div>
+<div class="flex items-center gap-1">
+<select class="bg-surface-container border border-outline-variant text-on-surface font-label-sm text-label-sm rounded px-1.5 py-0.5 focus:outline-none focus:border-primary">
+<option>Supervisé</option>
+<option>Automatique</option>
+</select>
+<button class="w-6 h-6 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" id="close-copilot-btn" title="Rétracter tiroir [→|]">
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Barre de progression d'optimisation en direct -->
+<div class="mt-2.5 bg-surface-container rounded p-2 border border-outline-variant">
+<div class="flex justify-between items-center text-label-sm font-label-sm mb-1">
+<span class="text-on-surface-variant">Routage automatique I2C &amp; Alimentation</span>
+<span class="text-primary font-code-sm font-bold">94% achevé</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full transition-all duration-500" style="width: 94%;"></div>
+</div>
+</div>
+</div>
+<!-- Historique de Conversation IA & Snippet Code .ato -->
+<div class="flex-1 overflow-y-auto p-3 space-y-3 font-body-md text-body-md">
+<!-- Message Ingénieur -->
+<div class="flex gap-2 items-start">
+<div class="w-6 h-6 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface text-[11px] font-bold shrink-0">
+            ING
+          </div>
+<div class="bg-surface-container rounded p-2.5 text-body-sm text-body-sm border border-outline-variant flex-1 text-on-surface">
+            Route l'alimentation 3.3V et optimise le plan thermique sous l'ESP32-S3.
+          </div>
+</div>
+<!-- Réponse Copilote Atopile avec snippet diff de code .ato -->
+<div class="flex gap-2 items-start">
+<div class="w-6 h-6 rounded bg-primary-container text-on-primary-container flex items-center justify-center text-[12px] font-bold shrink-0">
+<span class="material-symbols-outlined text-[15px]" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="bg-surface-container-lowest rounded p-2.5 text-body-sm text-body-sm border-l-2 border-primary border-t border-r border-b border-outline-variant flex-1">
+<div class="flex items-center justify-between pb-1 mb-1.5 border-b border-outline-variant">
+<span class="font-label-sm text-label-sm text-primary font-semibold">Proposition Diff .ato</span>
+<span class="px-1.5 py-0.2 rounded bg-primary-container/20 text-primary font-code-sm text-[10px]">Patch appliqué au layout</span>
+</div>
+<p class="text-on-surface-variant text-[12px] mb-2 leading-relaxed">
+              J'ai élargi la piste d'alimentation à 0.50mm pour supporter jusqu'à 1.5A et configuré un via array thermique 2x2 sous le thermal pad central.
+            </p>
+<!-- Snippet Code Syntaxé .ato -->
+<pre class="bg-surface-container-high p-2 rounded text-code-sm font-code-sm text-[11px] overflow-x-auto text-on-surface border border-outline-variant/60 leading-tight"><span class="text-outline-variant"># Definition du module alimentation</span>
+<span class="text-secondary font-bold">component</span> U2 <span class="text-primary">from</span> SOT23_5
+<span class="text-secondary font-bold">signal</span> NET_3V3
+
+<span class="text-primary-fixed">net</span> NET_3V3 ~ U2.VOUT
+<span class="text-primary-fixed">net</span> NET_3V3 ~ U1.VDD3P3
+<span class="text-primary-fixed">net</span> GND ~ U1.EPAD
+
+<span class="text-outline-variant"># Contraintes de routage haute intensite</span>
+NET_3V3.trace_width = <span class="text-secondary">0.50mm</span>
+U1.EPAD.thermal_vias = <span class="text-secondary">2x2</span></pre>
+<div class="mt-2 pt-1 flex items-center justify-between text-[11px] text-outline">
+<span class="flex items-center gap-1 font-code-sm">
+<span class="material-symbols-outlined text-[13px] text-primary" data-icon="check_circle">check_circle</span>
+                Validé par le compilateur ATO
+              </span>
+<span class="font-code-sm">82ms</span>
+</div>
+</div>
+</div>
+<!-- Mini Journal d'actions et compilation ATO Engine en direct -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-2.5 font-code-sm text-code-sm">
+<div class="flex items-center justify-between text-on-surface-variant pb-1.5 mb-1.5 border-b border-outline-variant text-[11px]">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="terminal">terminal</span>
+              Journal de Compilation Moteur
+            </span>
+<span class="text-primary font-bold">En direct</span>
+</div>
+<div class="space-y-1 text-[10.5px]">
+<div class="text-on-surface-variant">
+<span class="text-outline">14:35:12</span> <span class="text-primary font-medium">[ATO-CORE]</span> Compilation AST réussie (82ms)
+            </div>
+<div class="text-on-surface-variant">
+<span class="text-outline">14:35:14</span> <span class="text-sky-400 font-medium">[ROUTER]</span> 18 filets routés sans croisement
+            </div>
+<div class="text-secondary">
+<span class="text-outline">14:35:15</span> <span class="text-secondary-container font-medium">[DRC-CHECK]</span> 1 avertissement de dégagement détecté
+            </div>
+</div>
+</div>
+</div>
+<!-- Zone de Saisie d'Instructions Bas Tiroir -->
+<div class="p-3 border-t border-outline-variant bg-surface-container-lowest">
+<!-- Tags Rapides d'instructions -->
+<div class="flex items-center gap-1 mb-2 overflow-x-auto pb-0.5">
+<button class="px-2 py-0.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface rounded font-code-sm text-[10px] whitespace-nowrap transition-colors">
+            + Découplage
+          </button>
+<button class="px-2 py-0.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface rounded font-code-sm text-[10px] whitespace-nowrap transition-colors">
+            + Plan de masse
+          </button>
+<button class="px-2 py-0.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface rounded font-code-sm text-[10px] whitespace-nowrap transition-colors">
+            + Vérifier DRC
+          </button>
+</div>
+<!-- Input & Bouton d'Envoi -->
+<div class="relative">
+<textarea class="w-full bg-surface-container border border-outline-variant rounded p-2 text-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 focus:outline-none resize-none font-body-md" placeholder="Donnez une consigne de routage ou demandez une correction DRC..." rows="2"></textarea>
+<div class="absolute bottom-2 right-2 flex items-center gap-1.5">
+<span class="text-[10px] text-outline font-code-sm">Ctrl+↵</span>
+<button class="w-6 h-6 rounded bg-primary text-on-primary-container flex items-center justify-center hover:brightness-105 transition-all" title="Envoyer au Copilote IA">
+<span class="material-symbols-outlined text-[15px]" data-icon="send">send</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- ========================================================================= -->
+<!-- 5. BANDEAU INFÉRIEUR ULTRA-COMPACT (Hauteur ~28px)                       -->
+<!-- ========================================================================= -->
+<footer class="fixed bottom-0 left-0 right-0 h-7 z-50 bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between px-3 font-code-sm text-code-sm text-on-surface-variant">
+<!-- À gauche : Pastille DRC Cliquable -->
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container hover:bg-surface-container-high border border-outline-variant text-secondary transition-colors" title="Cliquer pour localiser les alertes DRC">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+<span class="font-semibold text-[11px]">DRC: 0 Erreurs, 1 Avertissement</span>
+</button>
+<span class="text-outline">|</span>
+<span class="text-[11px] text-on-surface-variant hidden md:inline">Couche active: <span class="text-primary font-medium">Top Copper (L1)</span></span>
+</div>
+<!-- Au centre : Statut Jalon & Synchronisation -->
+<div class="hidden sm:flex items-center gap-2 text-[11px]">
+<span class="text-primary font-medium">Jalon : Routage 94% terminé</span>
+<span class="text-outline">•</span>
+<span>22 pistes conformes</span>
+<span class="text-outline">•</span>
+<span class="flex items-center gap-1 text-primary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+        Synchronisation .ato temps réel
+      </span>
+</div>
+<!-- À droite : Métriques IA & Moteur ATO -->
+<div class="flex items-center gap-3 text-[11px]">
+<span class="hidden lg:inline text-outline">Jetons : <span class="text-on-surface">18 420 (~0.04 €)</span></span>
+<span class="hidden lg:inline text-outline">•</span>
+<span>Latence : <span class="text-primary font-medium">38ms/t</span></span>
+<span class="text-outline">•</span>
+<span class="text-on-surface font-medium">Moteur ATO v1.8.2</span>
+</div>
+</footer>
+<!-- Script d'interaction pour le tiroir latéral -->
+<script>
+    const copilotDrawer = document.getElementById('copilot-drawer');
+    const toggleBtn = document.getElementById('toggle-copilot-btn');
+    const closeBtn = document.getElementById('close-copilot-btn');
+
+    let isOpen = true;
+
+    function setDrawerState(open) {
+      isOpen = open;
+      if (isOpen) {
+        copilotDrawer.style.width = '380px';
+        copilotDrawer.style.display = 'flex';
+      } else {
+        copilotDrawer.style.width = '0px';
+        copilotDrawer.style.display = 'none';
+      }
+    }
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        setDrawerState(!isOpen);
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        setDrawerState(false);
+      });
+    }
+
+    // Raccourci Alt+K pour basculer le tiroir IA
+    window.addEventListener('keydown', (e) => {
+      if (e.altKey && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setDrawerState(!isOpen);
+      }
+    });
+  </script>
+</body></html>
