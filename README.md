@@ -14,6 +14,6 @@ Decision attendue sur le ticket #10 : variante gagnante ou panachage, puis layou
 ## Variante B v2 (retenue avec ajustements)
 
 - Fichier Stitch : screens/580f1aedb5a84e9cab744b05362283ef (« Variante B v2 - Studio central ajusté »), html files/da634d51712c4b7d8d7d27d44afdb470, shot files/e4b7237e77784781b4fdc2096f4abc6c.
-- HTML complet re-telechargeable via MCP stitch download_file (non recopie ici, source de verite = projet Stitch « NIA PCB — interface locale », id 9551096813191472550).
+- HTML complet : variante-b-v2-studio-central-ajuste.html (49044 octets, verifie). Sources Stitch d'origine : « NIA PCB — interface locale », id 9551096813191472550).
 - Ajustements appliques vs B : journal SSE sous le canvas (bandeau h-28 « Journal d'actions en direct »), bouton segmente [2D Vue dessus | 3D Rendu temps réel] visible dans la barre d'outils apercu, tiroir chat 420px (w-[420px]) avec diffs .ato + selecteur modele LLM local.
 - Verifie dans le HTML : toggle 2D/3D present, bandeau logs SSE present, chat w-[420px] present.
