@@ -29,6 +29,7 @@ from nia_pcb.parts_store import (
     make_parts_step,
 )
 from nia_pcb.projects import CreateProject, Project, ProjectNotFound, ProjectStore
+from nia_pcb.schematic import SchematicStore
 from nia_pcb.settings import PublicSettings, SettingsStore, SettingsUpdate
 from nia_pcb.specification import (
     BoardSpecification,
@@ -55,6 +56,7 @@ def create_app(
     from nia_pcb import ato_fix as _ato_fix_module  # noqa: F401
     from nia_pcb import ato_project as _ato_module  # noqa: F401
     from nia_pcb import parts_store as _parts_store_module  # noqa: F401
+    from nia_pcb import schematic as _schematic_module  # noqa: F401
     from nia_pcb.ato_fix import LlmAtoFixer, make_ato_fix_step
     from nia_pcb.ato_project import (
         AtoStore,
@@ -62,11 +64,13 @@ def create_app(
         projects_base_dir,
     )
     from nia_pcb.parts_catalog import CachedCatalog, JlcsearchCatalog
+    from nia_pcb.schematic import SchematicStore, make_schema_validation_step
 
     store = ProjectStore(database_path)
     specifications = SpecificationStore(store.engine)
     parts = PartsStore(store.engine)
     ato = AtoStore(store.engine, projects_base_dir(database_path))
+    schematic = SchematicStore(store.engine)
     default_catalog = CachedCatalog(catalog or JlcsearchCatalog())
     fixer = ato_fixer
     if fixer is None and model is not None:
@@ -76,6 +80,9 @@ def create_app(
         "pieces": make_parts_step(parts, default_catalog),
         "construire": make_ato_build_step(ato, ato_builder),
         "corriger": make_ato_fix_step(ato, ato_builder, fixer, engine=store.engine),
+        "valider_schema": make_schema_validation_step(
+            store, schematic, ato, ato_builder
+        ),
     }
     if steps:
         registered.update(steps)
@@ -94,6 +101,7 @@ def create_app(
     app.state.specifications = specifications
     app.state.parts = parts
     app.state.ato = ato
+    app.state.schematic = schematic
     app.state.settings = SettingsStore(store.engine)
     app.state.costs = CostStore(store.engine)
     app.include_router(router)
@@ -131,6 +139,10 @@ def get_ato(request: Request) -> AtoStore:
     return ato
 
 
+def get_schematic(request: Request) -> SchematicStore:
+    return request.app.state.schematic
+
+
 StoreDep = Annotated[ProjectStore, Depends(get_store)]
 JobsDep = Annotated[JobRunner, Depends(get_jobs)]
 SpecificationsDep = Annotated[SpecificationStore, Depends(get_specifications)]
@@ -138,6 +150,7 @@ SettingsDep = Annotated[SettingsStore, Depends(get_settings)]
 CostsDep = Annotated[CostStore, Depends(get_costs)]
 PartsDep = Annotated[PartsStore, Depends(get_parts)]
 AtoDep = Annotated[AtoStore, Depends(get_ato)]
+SchematicDep = Annotated[SchematicStore, Depends(get_schematic)]
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -242,6 +255,14 @@ def read_conversation(
 def open_project(project_id: str, store: StoreDep) -> Project:
     try:
         return store.open(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.get("/{project_id}/statuts")
+def read_status_history(project_id: str, store: StoreDep):
+    try:
+        return {"project_id": project_id, "transitions": store.history(project_id)}
     except ProjectNotFound:
         raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
 
@@ -467,6 +488,63 @@ def fix_ato(project_id: str, body: dict, jobs: JobsDep, store: StoreDep) -> Job:
         return jobs.launch(project_id, "corriger", inputs)
     except ProjectNotFound:
         raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.get("/{project_id}/schema")
+def read_schema(project_id: str, schematic: SchematicDep):
+    try:
+        view = schematic.read(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    if view is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Aucune vérification du schéma pour ce projet.",
+        )
+    return view
+
+
+@router.post("/{project_id}/schema/verifier", status_code=202)
+def verify_schema(project_id: str, body: dict, jobs: JobsDep, store: StoreDep) -> Job:
+    try:
+        store.open(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    if "valider_schema" not in jobs.steps:
+        raise HTTPException(status_code=422, detail="Cette étape n'est pas disponible.")
+    inputs: dict[str, str] = {}
+    if isinstance(body, dict):
+        for key in ("mode",):
+            value = body.get(key)
+            if value is not None:
+                inputs[key] = str(value)
+    try:
+        return jobs.launch(project_id, "valider_schema", inputs)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.post("/{project_id}/schema/valider")
+def validate_schema(
+    project_id: str, store: StoreDep, ato: AtoDep, schematic: SchematicDep
+):
+    from nia_pcb.schematic import (
+        SchematicNotEvaluated,
+        SchematicNotGreen,
+        validate_manual,
+    )
+
+    try:
+        return validate_manual(store, schematic, project_id, ato_store=ato)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    except SchematicNotEvaluated:
+        raise HTTPException(
+            status_code=409,
+            detail="Aucune vérification du schéma à valider.",
+        ) from None
+    except SchematicNotGreen as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 def _exigences_json(body: PartsRequest) -> str:

@@ -13,7 +13,7 @@ from sqlmodel import Field, Session, SQLModel, col, create_engine, select
 class Project(BaseModel):
     id: str
     name: str
-    status: Literal["brouillon"]
+    status: Literal["brouillon", "schema_valide"]
     created_at: datetime
     status_changed_at: datetime
 
@@ -112,9 +112,50 @@ class ProjectStore:
                 raise ProjectNotFound(project_id)
             return _to_project(record)
 
+    def transition_to_schema_valide(self, project_id: str) -> Project:
+        """Porte brouillon -> schéma validé, datée et historisée."""
+        changed_at = datetime.now(UTC)
+        with Session(self.engine) as session:
+            record = session.get(ProjectRecord, project_id)
+            if record is None:
+                raise ProjectNotFound(project_id)
+            if record.status == "schema_valide":
+                return _to_project(record)
+            if record.status != "brouillon":
+                raise RuntimeError(
+                    f"transition impossible depuis {record.status} vers schéma validé"
+                )
+            record.status = "schema_valide"
+            record.status_changed_at = changed_at
+            session.add(record)
+            session.add(
+                StatusTransitionRecord(
+                    project_id=project_id,
+                    status="schema_valide",
+                    changed_at=changed_at,
+                )
+            )
+            session.commit()
+            session.refresh(record)
+            return _to_project(record)
+
+    def history(self, project_id: str) -> list[dict]:
+        with Session(self.engine) as session:
+            if session.get(ProjectRecord, project_id) is None:
+                raise ProjectNotFound(project_id)
+            rows = session.exec(
+                select(StatusTransitionRecord)
+                .where(StatusTransitionRecord.project_id == project_id)
+                .order_by(col(StatusTransitionRecord.changed_at))
+            ).all()
+            return [
+                {"status": row.status, "changed_at": row.changed_at.isoformat()}
+                for row in rows
+            ]
+
 
 def _to_project(record: ProjectRecord) -> Project:
-    if record.status != "brouillon":
+    if record.status not in {"brouillon", "schema_valide"}:
         raise RuntimeError(f"statut de projet inattendu : {record.status}")
     return Project(
         id=record.id,

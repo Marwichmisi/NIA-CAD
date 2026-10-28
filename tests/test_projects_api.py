@@ -77,4 +77,8 @@ def test_project_response_exposes_only_the_public_fields(tmp_path: Path) -> None
         "created_at",
         "status_changed_at",
     }
-    assert schema["Project"]["properties"]["status"]["const"] == "brouillon"
+    status = schema["Project"]["properties"]["status"]
+    assert set(status.get("enum", [status.get("const")])) == {
+        "brouillon",
+        "schema_valide",
+    }
