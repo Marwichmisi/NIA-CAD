@@ -1,2 +1,16 @@
 # OpenCode local config (contient des secrets locaux, ne pas committer)
 opencode.json
+
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+web/node_modules/
+web/.next/
+web/out/
