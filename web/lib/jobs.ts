@@ -16,6 +16,7 @@ export type Job = {
   checkpoint: string | null
   progress: { done: number; total: number } | null
   journal: string[]
+  result: Record<string, unknown> | null
   error: string | null
 }
 

@@ -5,10 +5,11 @@ import json
 import threading
 from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import update
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Field as SqlField
@@ -47,6 +48,7 @@ class Job(BaseModel):
     checkpoint: str | None = None
     progress: JobProgress | None = None
     journal: list[str] = Field(default_factory=list)
+    result: dict[str, Any] | None = None
     error: str | None = None
 
 
@@ -103,6 +105,7 @@ class JobRecord(SQLModel, table=True):
     progress_done: int | None = None
     progress_total: int | None = None
     error: str | None = None
+    result_json: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -163,11 +166,18 @@ class JobStore:
             ).first()
             if record is None:
                 return None
-            record.status = "en_cours"
-            record.updated_at = _now()
-            session.add(record)
+            job_id = record.id
+            observed = record.status
+            changed = session.connection().execute(
+                update(JobRecord)
+                .where(col(JobRecord.id) == job_id)
+                .where(col(JobRecord.status) == observed)
+                .values(status="en_cours", updated_at=_now())
+            )
             session.commit()
-            return record.id
+            if changed.rowcount != 1:
+                return None
+            return job_id
 
     def projects_with_open_jobs(self) -> list[str]:
         with Session(self.engine) as session:
@@ -278,7 +288,7 @@ class JobStore:
 
     def request_stop(self, project_id: str, job_id: str) -> Job:
         with Session(self.engine) as session:
-            record = self._locked(session, project_id, job_id)
+            record = self._require(session, project_id, job_id)
             if record.status not in {"en_attente", "en_cours"}:
                 raise JobNotStoppable(job_id)
             record.status = "arrete"
@@ -290,7 +300,7 @@ class JobStore:
 
     def request_resume(self, project_id: str, job_id: str) -> Job:
         with Session(self.engine) as session:
-            record = self._locked(session, project_id, job_id)
+            record = self._require(session, project_id, job_id)
             if record.status != "arrete":
                 raise JobNotResumable(job_id)
             record.status = "en_attente"
@@ -300,7 +310,7 @@ class JobStore:
             session.refresh(record)
             return _to_job(record)
 
-    def _locked(self, session: Session, project_id: str, job_id: str) -> JobRecord:
+    def _require(self, session: Session, project_id: str, job_id: str) -> JobRecord:
         if session.get(ProjectRecord, project_id) is None:
             raise ProjectNotFound(project_id)
         record = session.get(JobRecord, job_id)
@@ -316,34 +326,32 @@ class JobStore:
             session.expunge(record)
             return record
 
-    def complete(self, job_id: str) -> None:
-        self._set_status(job_id, "termine")
+    def complete(self, job_id: str, result: dict[str, Any] | None) -> None:
+        self._transition(
+            job_id,
+            "en_cours",
+            status="termine",
+            result_json=(
+                None if result is None else json.dumps(result, ensure_ascii=False)
+            ),
+        )
 
     def fail(self, job_id: str, message: str) -> None:
-        with Session(self.engine) as session:
-            record = session.get(JobRecord, job_id)
-            if record is None or record.status != "en_cours":
-                return
-            record.status = "echec"
-            record.error = message
-            record.updated_at = _now()
-            session.add(record)
-            session.commit()
+        self._transition(job_id, "en_cours", status="echec", error=message)
 
-    def _set_status(self, job_id: str, status: JobStatus) -> None:
+    def _transition(self, job_id: str, expected: str, **values: object) -> bool:
         with Session(self.engine) as session:
-            record = session.get(JobRecord, job_id)
-            if record is None or record.status != "en_cours":
-                return
-            record.status = status
-            record.updated_at = _now()
-            session.add(record)
+            changed = session.connection().execute(
+                update(JobRecord)
+                .where(col(JobRecord.id) == job_id)
+                .where(col(JobRecord.status) == expected)
+                .values(updated_at=_now(), **values)
+            )
             session.commit()
+            return changed.rowcount == 1
 
 
 class JobContext:
-    """Ce que voit une étape pendant qu'elle tourne."""
-
     def __init__(
         self,
         store: JobStore,
@@ -356,6 +364,7 @@ class JobContext:
         self._job_id = job_id
         self._halt = halt
         self._done = set(store.checkpoints(job_id))
+        self._result: dict[str, Any] | None = None
 
     def log(self, message: str) -> None:
         cleaned = message.strip()
@@ -364,6 +373,13 @@ class JobContext:
 
     def progress(self, done: int, total: int) -> None:
         self._store.set_progress(self._job_id, done, total)
+
+    def set_result(self, result: Mapping[str, Any]) -> None:
+        self._result = dict(result)
+
+    @property
+    def result(self) -> dict[str, Any] | None:
+        return None if self._result is None else dict(self._result)
 
     def effect(self, name: str, action: Callable[[], None]) -> None:
         cleaned = name.strip()
@@ -465,7 +481,7 @@ class JobRunner:
             return
         if self._halt.is_set() or self._store.status_of(job_id) != "en_cours":
             return
-        self._store.complete(job_id)
+        self._store.complete(job_id, context.result)
 
     def stop(self, project_id: str, job_id: str) -> Job:
         return self._store.request_stop(project_id, job_id)
@@ -525,5 +541,6 @@ def _to_job(record: JobRecord) -> Job:
         checkpoint=done[-1] if done else None,
         progress=progress,
         journal=json.loads(record.journal_json),
+        result=None if record.result_json is None else json.loads(record.result_json),
         error=record.error,
     )

@@ -129,11 +129,11 @@ def test_stop_then_resume_does_not_repeat_a_finished_effect(tmp_path: Path) -> N
     release = threading.Event()
 
     def step(context: Any) -> None:
-        def releve() -> None:
+        def record_reading() -> None:
             effects.append("releve")
             context.log("Relevé terminé")
 
-        context.effect("releve", releve)
+        context.effect("releve", record_reading)
         entered.set()
         while not release.is_set():
             context.abort_if_requested()
@@ -356,5 +356,30 @@ def test_latest_job_is_the_one_the_interface_follows(tmp_path: Path) -> None:
     assert missing.json()["detail"] == "Ce projet n'a pas de job."
     assert latest.status_code == 200
     assert latest.json()["id"] == created["id"]
+
+
+def test_finished_job_keeps_its_result(tmp_path: Path) -> None:
+    def step(context: Any) -> None:
+        context.set_result({"pieces": "3"})
+
+    with TestClient(
+        create_app(tmp_path / "nia.sqlite", steps={"pieces": step})
+    ) as client:
+        project = client.post("/api/projects", json={"name": "Capteur seuil"}).json()
+        launched = client.post(
+            f"/api/projects/{project['id']}/jobs",
+            json={"step": "pieces"},
+        )
+        job_id = launched.json()["id"]
+        deadline = time.monotonic() + 2
+        finished: dict[str, Any] = {}
+        while time.monotonic() < deadline:
+            finished = client.get(f"/api/projects/{project['id']}/jobs/{job_id}").json()
+            if finished["status"] == "termine":
+                break
+            time.sleep(0.02)
+
+    assert finished["status"] == "termine"
+    assert finished["result"] == {"pieces": "3"}
 
 
