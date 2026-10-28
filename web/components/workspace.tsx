@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { JobJournal } from "@/components/job-journal"
 import { PreviewPanel } from "@/components/preview-panel"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -19,6 +20,7 @@ import {
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller"
 import { formatProjectDate, type Project } from "@/lib/projects"
+import type { Job } from "@/lib/jobs"
 
 const STEPS = [
   "Spécification",
@@ -28,7 +30,13 @@ const STEPS = [
   "Fabrication",
 ]
 
-export function Workspace({ project }: { project: Project }) {
+export function Workspace({
+  project,
+  job,
+}: {
+  project: Project
+  job: Job | null
+}) {
   return (
     <div className="grid min-h-svh grid-cols-1 [grid-template-areas:'header'_'steps'_'preview'_'journal'_'chat'] lg:h-svh lg:grid-cols-[14rem_minmax(0,1fr)_22rem] lg:grid-rows-[auto_minmax(0,1fr)_12rem] lg:[grid-template-areas:'header_header_header'_'steps_preview_chat'_'steps_journal_chat']">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 [grid-area:header]">
@@ -69,11 +77,9 @@ export function Workspace({ project }: { project: Project }) {
 
       <PreviewPanel />
 
-      <section className="flex flex-col gap-3 border-t p-4 [grid-area:journal]">
+      <section className="flex min-h-0 flex-col gap-3 border-t p-4 [grid-area:journal]">
         <h2 className="text-sm font-medium">Journal</h2>
-        <Marker>
-          <MarkerContent>Aucune action.</MarkerContent>
-        </Marker>
+        <JobJournal projectId={project.id} initialJob={job} />
       </section>
 
       <aside className="flex min-h-80 flex-col border-t [grid-area:chat] lg:min-h-0 lg:border-t-0 lg:border-l">

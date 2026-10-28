@@ -2,6 +2,7 @@ import { connection } from "next/server"
 import { notFound } from "next/navigation"
 
 import { Workspace } from "@/components/workspace"
+import { latestJob } from "@/lib/jobs"
 import { openProject } from "@/lib/projects"
 
 export const dynamic = "force-dynamic"
@@ -17,5 +18,6 @@ export default async function ProjectPage({
   if (!project) {
     notFound()
   }
-  return <Workspace project={project} />
+  const job = await latestJob(id)
+  return <Workspace project={project} job={job} />
 }

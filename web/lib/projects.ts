@@ -11,7 +11,7 @@ export type CreateProjectResult =
   | { ok: true; project: Project }
   | { ok: false; message: string }
 
-function apiOrigin(): string {
+export function apiOrigin(): string {
   if (typeof window === "undefined") {
     return process.env.API_URL ?? "http://127.0.0.1:8000"
   }
