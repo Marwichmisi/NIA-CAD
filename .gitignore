@@ -1,6 +1,10 @@
 # OpenCode local config (contient des secrets locaux, ne pas committer)
 opencode.json
 
+# Secrets locaux (clés LLM/JLCPCB) — jamais versionnés
+.env
+.env.local
+
 .venv/
 __pycache__/
 .pytest_cache/

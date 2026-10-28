@@ -228,7 +228,12 @@ class JobStore:
             ]
 
     def append_journal(self, job_id: str, message: str) -> None:
-        self._record_event(job_id, "journal", {"message": message}, message=message)
+        from nia_pcb.secrets import redact_text, redact_value
+
+        cleaned = redact_text(message)
+        payload = redact_value({"message": cleaned})
+        assert isinstance(payload, dict)
+        self._record_event(job_id, "journal", payload, message=cleaned)
 
     def set_progress(self, job_id: str, done: int, total: int) -> None:
         self._record_event(
@@ -246,13 +251,18 @@ class JobStore:
         message: str | None = None,
         progress: tuple[int, int] | None = None,
     ) -> None:
+        from nia_pcb.secrets import redact_text, redact_value
+
+        safe_message = None if message is None else redact_text(message)
+        safe_payload = redact_value(payload)
+        assert isinstance(safe_payload, dict)
         with Session(self.engine) as session:
             record = session.get(JobRecord, job_id)
             if record is None:
                 return
-            if message is not None:
+            if safe_message is not None:
                 journal = json.loads(record.journal_json)
-                journal.append(message)
+                journal.append(safe_message)
                 record.journal_json = json.dumps(journal, ensure_ascii=False)
             if progress is not None:
                 record.progress_done, record.progress_total = progress
@@ -262,7 +272,7 @@ class JobStore:
                 JobEventRecord(
                     job_id=job_id,
                     kind=kind,
-                    payload_json=json.dumps(payload, ensure_ascii=False),
+                    payload_json=json.dumps(safe_payload, ensure_ascii=False),
                 )
             )
             session.commit()
@@ -327,17 +337,25 @@ class JobStore:
             return record
 
     def complete(self, job_id: str, result: dict[str, Any] | None) -> None:
+        from nia_pcb.secrets import redact_value
+
+        safe = None if result is None else redact_value(result)
+        assert safe is None or isinstance(safe, dict)
         self._transition(
             job_id,
             "en_cours",
             status="termine",
             result_json=(
-                None if result is None else json.dumps(result, ensure_ascii=False)
+                None if safe is None else json.dumps(safe, ensure_ascii=False)
             ),
         )
 
     def fail(self, job_id: str, message: str) -> None:
-        self._transition(job_id, "en_cours", status="echec", error=message)
+        from nia_pcb.secrets import redact_text
+
+        self._transition(
+            job_id, "en_cours", status="echec", error=redact_text(message)
+        )
 
     def _transition(self, job_id: str, expected: str, **values: object) -> bool:
         with Session(self.engine) as session:
@@ -467,10 +485,32 @@ class JobRunner:
         if step is None:
             self._store.fail(job_id, "Cette étape n'est pas disponible.")
             return
+        inputs = json.loads(record.inputs_json)
+        try:
+            from nia_pcb.costs import CostStore
+
+            over_budget = CostStore(self._store.engine).summary(
+                record.project_id
+            ).over_budget
+        except Exception:
+            self._store.fail(job_id, "Budget illisible. Réessaie plus tard.")
+            return
+        if over_budget:
+            override = _explicit_override(inputs)
+            if not override:
+                self._store.fail(
+                    job_id,
+                    "Budget projet dépassé. "
+                    "Relance avec un dépassement explicite ou augmente le budget.",
+                )
+                return
+            self._store.append_journal(
+                job_id, "Dépassement budgétaire autorisé manuellement."
+            )
         context = JobContext(
             self._store,
             job_id,
-            json.loads(record.inputs_json),
+            inputs,
             self._halt,
             record.project_id,
         )
@@ -531,12 +571,23 @@ def _existing_job(session: Session, key: str) -> Job | None:
 
 
 def _to_job(record: JobRecord) -> Job:
+    from nia_pcb.secrets import redact_value
+
     if record.status not in {"en_attente", "en_cours", "arrete", "termine", "echec"}:
         raise RuntimeError(f"statut de job inattendu : {record.status}")
     done = json.loads(record.checkpoints_json)
     progress = None
     if record.progress_done is not None and record.progress_total is not None:
         progress = JobProgress(done=record.progress_done, total=record.progress_total)
+    journal = redact_value(json.loads(record.journal_json))
+    assert isinstance(journal, list)
+    result = None if record.result_json is None else redact_value(
+        json.loads(record.result_json)
+    )
+    assert result is None or isinstance(result, dict)
+    error = None if record.error is None else str(
+        redact_value(record.error)
+    )
     return Job(
         id=record.id,
         project_id=record.project_id,
@@ -544,7 +595,26 @@ def _to_job(record: JobRecord) -> Job:
         status=record.status,
         checkpoint=done[-1] if done else None,
         progress=progress,
-        journal=json.loads(record.journal_json),
-        result=None if record.result_json is None else json.loads(record.result_json),
-        error=record.error,
+        journal=journal,
+        result=result,
+        error=error,
     )
+
+
+def _explicit_override(inputs: object) -> bool:
+    if not isinstance(inputs, dict):
+        return False
+    raw = inputs.get("allow_over_budget")
+    if raw is True:
+        return True
+    return str(raw).strip().lower() in {"true", "1", "oui", "yes"}
+
+
+def _budget_blocks(engine, project_id: str, inputs: object) -> bool:
+    try:
+        from nia_pcb.costs import CostStore
+
+        summary = CostStore(engine).summary(project_id)
+    except Exception:
+        return False
+    return bool(summary.over_budget)

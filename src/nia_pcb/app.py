@@ -9,6 +9,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from fastapi.sse import EventSourceResponse, ServerSentEvent
 
+from nia_pcb.costs import CostStore, CostsTotals, CostSummary, RecordCost
 from nia_pcb.jobs import (
     Job,
     JobContext,
@@ -20,6 +21,7 @@ from nia_pcb.jobs import (
     ProjectHasNoJob,
 )
 from nia_pcb.projects import CreateProject, Project, ProjectNotFound, ProjectStore
+from nia_pcb.settings import PublicSettings, SettingsStore, SettingsUpdate
 from nia_pcb.specification import (
     BoardSpecification,
     Conversation,
@@ -58,7 +60,11 @@ def create_app(
     app.state.projects = store
     app.state.jobs = jobs
     app.state.specifications = specifications
+    app.state.settings = SettingsStore(store.engine)
+    app.state.costs = CostStore(store.engine)
     app.include_router(router)
+    app.include_router(settings_router)
+    app.include_router(costs_router)
     return app
 
 
@@ -74,11 +80,60 @@ def get_specifications(request: Request) -> SpecificationStore:
     return request.app.state.specifications
 
 
+def get_settings(request: Request) -> SettingsStore:
+    return request.app.state.settings
+
+
+def get_costs(request: Request) -> CostStore:
+    return request.app.state.costs
+
+
 StoreDep = Annotated[ProjectStore, Depends(get_store)]
 JobsDep = Annotated[JobRunner, Depends(get_jobs)]
 SpecificationsDep = Annotated[SpecificationStore, Depends(get_specifications)]
+SettingsDep = Annotated[SettingsStore, Depends(get_settings)]
+CostsDep = Annotated[CostStore, Depends(get_costs)]
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
+
+settings_router = APIRouter(prefix="/api/settings", tags=["settings"])
+
+costs_router = APIRouter(prefix="/api/costs", tags=["costs"])
+
+
+@settings_router.get("")
+def read_settings(settings: SettingsDep) -> PublicSettings:
+    return settings.get()
+
+
+@settings_router.put("")
+def update_settings(body: SettingsUpdate, settings: SettingsDep) -> PublicSettings:
+    return settings.update(body)
+
+
+@settings_router.post("/reset")
+def reset_settings(settings: SettingsDep) -> PublicSettings:
+    return settings.reset()
+
+
+@costs_router.get("")
+def read_totals(costs: CostsDep, store: StoreDep) -> CostsTotals:
+    total_tokens, total_cost = costs.totals()
+    breakdown = costs.per_project()
+    names = {project.id: project.name for project in store.list_projects()}
+    return CostsTotals(
+        total_tokens=total_tokens,
+        total_cost=total_cost,
+        projects=[
+            {
+                "project_id": str(item["project_id"]),
+                "project_name": names.get(str(item["project_id"]), ""),
+                "tokens": int(item["tokens"]),
+                "cost": float(item["cost"]),
+            }
+            for item in breakdown
+        ],
+    )
 
 
 @router.post("", status_code=201)
@@ -235,3 +290,19 @@ def resume_job(project_id: str, job_id: str, jobs: JobsDep) -> Job:
         raise HTTPException(
             status_code=409, detail="Ce job ne peut pas être repris."
         ) from None
+
+
+@router.get("/{project_id}/costs")
+def read_costs(project_id: str, costs: CostsDep) -> CostSummary:
+    try:
+        return costs.summary(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.post("/{project_id}/costs", status_code=201)
+def add_costs(project_id: str, body: RecordCost, costs: CostsDep) -> CostSummary:
+    try:
+        return costs.record(project_id, body.tokens, body.cost_eur, body.note)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
