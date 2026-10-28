@@ -80,7 +80,7 @@ export function Workspace({
         </ol>
       </aside>
 
-      <PreviewPanel />
+      <PreviewPanel projectId={project.id} />
 
       <section className="flex min-h-0 flex-col gap-3 border-t p-4 [grid-area:journal]">
         <h2 className="text-sm font-medium">Journal</h2>

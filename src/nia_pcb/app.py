@@ -9,6 +9,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from fastapi.sse import EventSourceResponse, ServerSentEvent
 
+from nia_pcb.ato_project import AtoStore, WriteAto, WriteAtoFile
 from nia_pcb.costs import CostStore, CostsTotals, CostSummary, RecordCost
 from nia_pcb.jobs import (
     Job,
@@ -47,18 +48,27 @@ def create_app(
     steps: dict[str, Callable[[JobContext], None]] | None = None,
     model: LanguageModel | None = None,
     catalog=None,
+    ato_builder=None,
 ) -> FastAPI:
-    # Import tardif : enregistre la table parts_lists avant create_all.
+    # Import tardif : enregistre les tables avant create_all.
+    from nia_pcb import ato_project as _ato_module  # noqa: F401
     from nia_pcb import parts_store as _parts_store_module  # noqa: F401
+    from nia_pcb.ato_project import (
+        AtoStore,
+        make_ato_build_step,
+        projects_base_dir,
+    )
     from nia_pcb.parts_catalog import CachedCatalog, JlcsearchCatalog
 
     store = ProjectStore(database_path)
     specifications = SpecificationStore(store.engine)
     parts = PartsStore(store.engine)
+    ato = AtoStore(store.engine, projects_base_dir(database_path))
     default_catalog = CachedCatalog(catalog or JlcsearchCatalog())
     registered: dict[str, Callable[[JobContext], None]] = {
         "specification": make_specification_step(specifications, model),
         "pieces": make_parts_step(parts, default_catalog),
+        "construire": make_ato_build_step(ato, ato_builder),
     }
     if steps:
         registered.update(steps)
@@ -76,6 +86,7 @@ def create_app(
     app.state.jobs = jobs
     app.state.specifications = specifications
     app.state.parts = parts
+    app.state.ato = ato
     app.state.settings = SettingsStore(store.engine)
     app.state.costs = CostStore(store.engine)
     app.include_router(router)
@@ -108,12 +119,18 @@ def get_parts(request: Request) -> PartsStore:
     return request.app.state.parts
 
 
+def get_ato(request: Request) -> AtoStore:
+    ato: AtoStore = request.app.state.ato
+    return ato
+
+
 StoreDep = Annotated[ProjectStore, Depends(get_store)]
 JobsDep = Annotated[JobRunner, Depends(get_jobs)]
 SpecificationsDep = Annotated[SpecificationStore, Depends(get_specifications)]
 SettingsDep = Annotated[SettingsStore, Depends(get_settings)]
 CostsDep = Annotated[CostStore, Depends(get_costs)]
 PartsDep = Annotated[PartsStore, Depends(get_parts)]
+AtoDep = Annotated[AtoStore, Depends(get_ato)]
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -367,6 +384,62 @@ def validate_parts(project_id: str, parts: PartsDep) -> PartsView:
         raise HTTPException(
             status_code=409, detail="Aucune liste de pièces à valider."
         ) from None
+
+
+@router.get("/{project_id}/ato")
+def read_ato(project_id: str, ato: AtoDep):
+    try:
+        return ato.read(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.put("/{project_id}/ato")
+def write_ato(project_id: str, body: WriteAto, ato: AtoDep):
+    try:
+        return ato.write(project_id, body.code)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.put("/{project_id}/ato/fichier")
+def write_ato_file(project_id: str, body: WriteAtoFile, ato: AtoDep):
+    try:
+        return ato.write_file(project_id, body.chemin, body.code)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get("/{project_id}/ato/versions")
+def read_ato_versions(project_id: str, ato: AtoDep):
+    try:
+        return ato.versions(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.get("/{project_id}/ato/bom")
+def read_ato_bom(project_id: str, ato: AtoDep):
+    try:
+        return ato.read_bom(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.post("/{project_id}/ato/construire", status_code=202)
+def build_ato(project_id: str, jobs: JobsDep, store: StoreDep) -> Job:
+    try:
+        store.open(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    if "construire" not in jobs.steps:
+        raise HTTPException(status_code=422, detail="Cette étape n'est pas disponible.")
+    try:
+        return jobs.launch(project_id, "construire", {})
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
 
 
 def _exigences_json(body: PartsRequest) -> str:
