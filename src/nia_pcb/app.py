@@ -20,6 +20,13 @@ from nia_pcb.jobs import (
     LaunchJob,
     ProjectHasNoJob,
 )
+from nia_pcb.parts_store import (
+    PartsNotFound,
+    PartsRequest,
+    PartsStore,
+    PartsView,
+    make_parts_step,
+)
 from nia_pcb.projects import CreateProject, Project, ProjectNotFound, ProjectStore
 from nia_pcb.settings import PublicSettings, SettingsStore, SettingsUpdate
 from nia_pcb.specification import (
@@ -39,11 +46,19 @@ def create_app(
     database_path: Path,
     steps: dict[str, Callable[[JobContext], None]] | None = None,
     model: LanguageModel | None = None,
+    catalog=None,
 ) -> FastAPI:
+    # Import tardif : enregistre la table parts_lists avant create_all.
+    from nia_pcb import parts_store as _parts_store_module  # noqa: F401
+    from nia_pcb.parts_catalog import CachedCatalog, JlcsearchCatalog
+
     store = ProjectStore(database_path)
     specifications = SpecificationStore(store.engine)
+    parts = PartsStore(store.engine)
+    default_catalog = CachedCatalog(catalog or JlcsearchCatalog())
     registered: dict[str, Callable[[JobContext], None]] = {
-        "specification": make_specification_step(specifications, model)
+        "specification": make_specification_step(specifications, model),
+        "pieces": make_parts_step(parts, default_catalog),
     }
     if steps:
         registered.update(steps)
@@ -60,6 +75,7 @@ def create_app(
     app.state.projects = store
     app.state.jobs = jobs
     app.state.specifications = specifications
+    app.state.parts = parts
     app.state.settings = SettingsStore(store.engine)
     app.state.costs = CostStore(store.engine)
     app.include_router(router)
@@ -88,11 +104,16 @@ def get_costs(request: Request) -> CostStore:
     return request.app.state.costs
 
 
+def get_parts(request: Request) -> PartsStore:
+    return request.app.state.parts
+
+
 StoreDep = Annotated[ProjectStore, Depends(get_store)]
 JobsDep = Annotated[JobRunner, Depends(get_jobs)]
 SpecificationsDep = Annotated[SpecificationStore, Depends(get_specifications)]
 SettingsDep = Annotated[SettingsStore, Depends(get_settings)]
 CostsDep = Annotated[CostStore, Depends(get_costs)]
+PartsDep = Annotated[PartsStore, Depends(get_parts)]
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -306,3 +327,49 @@ def add_costs(project_id: str, body: RecordCost, costs: CostsDep) -> CostSummary
         return costs.record(project_id, body.tokens, body.cost_eur, body.note)
     except ProjectNotFound:
         raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.post("/{project_id}/pieces/rechercher", status_code=202)
+def search_parts(
+    project_id: str, body: PartsRequest, jobs: JobsDep, store: StoreDep
+) -> Job:
+    try:
+        store.open(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    if "pieces" not in jobs.steps:
+        raise HTTPException(status_code=422, detail="Cette étape n'est pas disponible.")
+    try:
+        return jobs.launch(
+            project_id,
+            "pieces",
+            {"exigences": _exigences_json(body)},
+        )
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.get("/{project_id}/pieces")
+def read_parts(project_id: str, parts: PartsDep) -> PartsView:
+    try:
+        return parts.read(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.post("/{project_id}/pieces/valider")
+def validate_parts(project_id: str, parts: PartsDep) -> PartsView:
+    try:
+        return parts.validate(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    except PartsNotFound:
+        raise HTTPException(
+            status_code=409, detail="Aucune liste de pièces à valider."
+        ) from None
+
+
+def _exigences_json(body: PartsRequest) -> str:
+    import json as _json
+
+    return _json.dumps([item.model_dump() for item in body.exigences])
