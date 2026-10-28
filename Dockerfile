@@ -16,11 +16,13 @@ WORKDIR /app
 RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin nia
 COPY --from=builder /app/.venv /app/.venv
 COPY pyproject.toml ./
+COPY prompts ./prompts
 COPY docker/api-entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
 
 ENV PATH="/app/.venv/bin:$PATH" \
     NIA_DATABASE=/data/nia.sqlite \
+    NIA_PROMPTS=/app/prompts \
     PYTHONUNBUFFERED=1
 
 EXPOSE 8000

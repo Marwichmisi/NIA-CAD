@@ -20,14 +20,32 @@ from nia_pcb.jobs import (
     ProjectHasNoJob,
 )
 from nia_pcb.projects import CreateProject, Project, ProjectNotFound, ProjectStore
+from nia_pcb.specification import (
+    BoardSpecification,
+    Conversation,
+    Demand,
+    LanguageModel,
+    ReadySpecification,
+    SpecificationNotEditable,
+    SpecificationStore,
+    SpecificationView,
+    make_specification_step,
+)
 
 
 def create_app(
     database_path: Path,
     steps: dict[str, Callable[[JobContext], None]] | None = None,
+    model: LanguageModel | None = None,
 ) -> FastAPI:
     store = ProjectStore(database_path)
-    jobs = JobRunner(store.engine, steps or {})
+    specifications = SpecificationStore(store.engine)
+    registered: dict[str, Callable[[JobContext], None]] = {
+        "specification": make_specification_step(specifications, model)
+    }
+    if steps:
+        registered.update(steps)
+    jobs = JobRunner(store.engine, registered)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
@@ -39,6 +57,7 @@ def create_app(
     app = FastAPI(title="NIA PCB", lifespan=lifespan)
     app.state.projects = store
     app.state.jobs = jobs
+    app.state.specifications = specifications
     app.include_router(router)
     return app
 
@@ -51,8 +70,13 @@ def get_jobs(request: Request) -> JobRunner:
     return request.app.state.jobs
 
 
+def get_specifications(request: Request) -> SpecificationStore:
+    return request.app.state.specifications
+
+
 StoreDep = Annotated[ProjectStore, Depends(get_store)]
 JobsDep = Annotated[JobRunner, Depends(get_jobs)]
+SpecificationsDep = Annotated[SpecificationStore, Depends(get_specifications)]
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -67,6 +91,53 @@ def list_projects(store: StoreDep) -> list[Project]:
     return store.list_projects()
 
 
+@router.post("/{project_id}/demandes", status_code=202)
+def submit_demand(project_id: str, body: Demand, jobs: JobsDep) -> Job:
+    try:
+        return jobs.launch(
+            project_id,
+            "specification",
+            {"text": body.text, "mode": body.mode},
+        )
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.get("/{project_id}/specification")
+def read_specification(
+    project_id: str, specifications: SpecificationsDep
+) -> SpecificationView:
+    try:
+        return specifications.read(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.patch("/{project_id}/specification")
+def edit_specification(
+    project_id: str, body: BoardSpecification, specifications: SpecificationsDep
+) -> ReadySpecification:
+    try:
+        return specifications.update(project_id, body)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    except SpecificationNotEditable:
+        raise HTTPException(
+            status_code=409,
+            detail="La spécification n'est pas encore modifiable.",
+        ) from None
+
+
+@router.get("/{project_id}/conversation")
+def read_conversation(
+    project_id: str, specifications: SpecificationsDep
+) -> Conversation:
+    try:
+        return specifications.conversation(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
 @router.get("/{project_id}")
 def open_project(project_id: str, store: StoreDep) -> Project:
     try:
@@ -78,9 +149,7 @@ def open_project(project_id: str, store: StoreDep) -> Project:
 @router.post("/{project_id}/jobs", status_code=202)
 def launch_job(project_id: str, body: LaunchJob, jobs: JobsDep) -> Job:
     if body.step not in jobs.steps:
-        raise HTTPException(
-            status_code=422, detail="Cette étape n'est pas disponible."
-        )
+        raise HTTPException(status_code=422, detail="Cette étape n'est pas disponible.")
     try:
         return jobs.launch(project_id, body.step, body.inputs)
     except ProjectNotFound:

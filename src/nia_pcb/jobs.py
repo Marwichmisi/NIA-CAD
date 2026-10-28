@@ -358,8 +358,11 @@ class JobContext:
         job_id: str,
         inputs: Mapping[str, str],
         halt: threading.Event,
+        project_id: str,
     ) -> None:
         self.inputs = dict(inputs)
+        self.project_id = project_id
+        self.job_id = job_id
         self._store = store
         self._job_id = job_id
         self._halt = halt
@@ -469,6 +472,7 @@ class JobRunner:
             job_id,
             json.loads(record.inputs_json),
             self._halt,
+            record.project_id,
         )
         try:
             step(context)
