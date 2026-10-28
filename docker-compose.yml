@@ -7,6 +7,10 @@ services:
       - "8000:8000"
     environment:
       NIA_DATABASE: /data/nia.sqlite
+      NIA_PROMPTS: /app/prompts
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
     volumes:
       - nia-data:/data
 
