@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 
+import { Modele3D } from "@/components/modele-3d"
 import {
   Empty,
   EmptyDescription,
@@ -10,6 +11,13 @@ import {
 } from "@/components/ui/empty"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import {
+  genererApercu,
+  modele3dUrl,
+  readApercu,
+  waitForApercuJob,
+  type ApercuView,
+} from "@/lib/apercu"
 import { buildAto, readAto, readBom, saveAto, waitForAtoJob, type BomView } from "@/lib/ato"
 
 const PANES = [
@@ -28,21 +36,31 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
   const [code, setCode] = useState("")
   const [version, setVersion] = useState(0)
   const [bom, setBom] = useState<BomView | null>(null)
+  const [apercu, setApercu] = useState<ApercuView | null>(null)
+  const [coucheId, setCoucheId] = useState("F.Cu")
   const [busy, setBusy] = useState(false)
+  const [busyApercu, setBusyApercu] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
       try {
-        const [ato, nomenclature] = await Promise.all([
+        const [ato, nomenclature, ap] = await Promise.all([
           readAto(projectId),
           readBom(projectId),
+          readApercu(projectId),
         ])
         if (!cancelled) {
           setCode(ato.code)
           setVersion(ato.version)
           setBom(nomenclature)
+          setApercu(ap)
+          if (ap.couches.length > 0) {
+            setCoucheId((prev) =>
+              ap.couches.some((c) => c.id === prev) ? prev : ap.couches[0].id
+            )
+          }
         }
       } catch (error) {
         if (!cancelled) {
@@ -84,6 +102,19 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
       const launched = await buildAto(projectId)
       setMessage("Construction lancée : suis le journal sous l'aperçu.")
       const finished = await waitForAtoJob(projectId, launched.id)
+      if (finished.status === "echec") {
+        const [ato, nomenclature, ap] = await Promise.all([
+          readAto(projectId),
+          readBom(projectId),
+          readApercu(projectId),
+        ])
+        setCode(ato.code)
+        setVersion(ato.version)
+        setBom(nomenclature)
+        setApercu(ap)
+        setMessage(finished.error ?? "La construction a échoué.")
+        return
+      }
       const [ato, nomenclature] = await Promise.all([
         readAto(projectId),
         readBom(projectId),
@@ -91,10 +122,26 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
       setCode(ato.code)
       setVersion(ato.version)
       setBom(nomenclature)
+      // Après une construction avec layout, l'aperçu doit suivre :
+      // génération best-effort, le 2D/3D existant reste sinon.
+      try {
+        const gen = await genererApercu(projectId)
+        await waitForApercuJob(projectId, gen.id)
+      } catch {
+        // L'aperçu reste lisible même si KiCad est absent.
+      }
+      const ap = await readApercu(projectId)
+      setApercu(ap)
+      if (ap.couches.length > 0) {
+        setCoucheId((prev) =>
+          ap.couches.some((c) => c.id === prev) ? prev : ap.couches[0].id
+        )
+      }
       setMessage(
-        finished.status === "echec"
-          ? (finished.error ?? "La construction a échoué.")
-          : `Construction rapide : BOM ${nomenclature.entrees.length} ligne(s), layout à jour.`
+        `Construction rapide : BOM ${nomenclature.entrees.length} ligne(s), ` +
+          `aperçu v${ap.version} (${ap.couches.length} couche(s)` +
+          (ap.modele_3d_disponible ? ", modèle 3D prêt" : ", sans modèle 3D") +
+          ")."
       )
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Construction impossible.")
@@ -102,6 +149,38 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
       setBusy(false)
     }
   }
+
+  async function onGenererApercu() {
+    setBusyApercu(true)
+    setMessage(null)
+    try {
+      const launched = await genererApercu(projectId)
+      setMessage("Génération de l'aperçu lancée.")
+      const finished = await waitForApercuJob(projectId, launched.id)
+      const ap = await readApercu(projectId)
+      setApercu(ap)
+      if (ap.couches.length > 0) {
+        setCoucheId((prev) =>
+          ap.couches.some((c) => c.id === prev) ? prev : ap.couches[0].id
+        )
+      }
+      setMessage(
+        finished.status === "echec"
+          ? (finished.error ?? "La génération de l'aperçu a échoué.")
+          : `Aperçu v${ap.version} : ${ap.couches.length} couche(s)` +
+              (ap.modele_3d_disponible ? ", modèle 3D prêt." : ", sans modèle 3D.")
+      )
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Génération impossible."
+      )
+    } finally {
+      setBusyApercu(false)
+    }
+  }
+
+  const coucheActive =
+    apercu?.couches.find((c) => c.id === coucheId) ?? apercu?.couches[0]
 
   return (
     <section className="flex min-h-96 flex-col gap-3 p-4 [grid-area:preview] lg:min-h-0">
@@ -138,26 +217,101 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
           ))}
         </TabsList>
         <TabsContent value="carte" className="min-h-64 flex-1">
+          <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <span>
+              {apercu
+                ? `Aperçu v${apercu.version} / code v${apercu.version_courante}`
+                : version > 0
+                  ? `Version ${version}`
+                  : "Aucune version"}
+            </span>
+            {apercu && !apercu.a_jour ? (
+              <span className="text-amber-600">
+                Obsolète — régénère après modification.
+              </span>
+            ) : null}
+            <button
+              type="button"
+              disabled={busyApercu}
+              onClick={() => void onGenererApercu()}
+              className="text-sm underline"
+            >
+              Générer l&apos;aperçu
+            </button>
+          </div>
           {view === "2d" ? (
-            <div className="board-grid flex h-full min-h-64 items-center justify-center">
-              <Empty>
+            apercu && apercu.couches.length > 0 && coucheActive ? (
+              <div className="flex h-full min-h-64 flex-col gap-2">
+                <div
+                  role="tablist"
+                  aria-label="Couches 2D"
+                  className="flex flex-wrap gap-2"
+                >
+                  {apercu.couches.map((couche) => (
+                    <button
+                      key={couche.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={couche.id === coucheActive.id}
+                      onClick={() => setCoucheId(couche.id)}
+                      className="text-sm underline"
+                    >
+                      {couche.label}
+                    </button>
+                  ))}
+                </div>
+                <div
+                  data-testid={`couche-${coucheActive.id}`}
+                  className="board-grid flex h-full min-h-64 items-center justify-center overflow-auto"
+                  // Le SVG vient du backend (kicad-cli) : affichage direct.
+                  dangerouslySetInnerHTML={{ __html: coucheActive.svg }}
+                />
+                {apercu.pieces_sans_modele_3d.length > 0 ? (
+                  <p className="text-sm text-amber-600">
+                    Pièces sans modèle 3D :{" "}
+                    {apercu.pieces_sans_modele_3d.join(", ")}
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <div className="board-grid flex h-full min-h-64 items-center justify-center">
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyTitle>Pas de carte</EmptyTitle>
+                    <EmptyDescription>
+                      Le cuivre apparaîtra ici, couche par couche.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              </div>
+            )
+          ) : apercu?.modele_3d_disponible && apercu.modele_3d_url ? (
+            <div className="flex h-full min-h-64 flex-col gap-2">
+              <Modele3D url={modele3dUrl(projectId)} />
+              {apercu.pieces_sans_modele_3d.length > 0 ? (
+                <p className="text-sm text-amber-600">
+                  Pièces sans modèle 3D :{" "}
+                  {apercu.pieces_sans_modele_3d.join(", ")}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <div className="flex h-full min-h-64 flex-col items-center justify-center gap-2">
+              <Empty className="h-full min-h-64">
                 <EmptyHeader>
-                  <EmptyTitle>Pas de carte</EmptyTitle>
+                  <EmptyTitle>Pas de modèle 3D</EmptyTitle>
                   <EmptyDescription>
-                    Le cuivre apparaîtra ici, couche par couche.
+                    Le volume de la carte s&apos;affichera après la construction.
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
+              {apercu && apercu.pieces_sans_modele_3d.length > 0 ? (
+                <p className="text-sm text-amber-600">
+                  Pièces sans modèle 3D :{" "}
+                  {apercu.pieces_sans_modele_3d.join(", ")}
+                </p>
+              ) : null}
             </div>
-          ) : (
-            <Empty className="h-full min-h-64">
-              <EmptyHeader>
-                <EmptyTitle>Pas de modèle 3D</EmptyTitle>
-                <EmptyDescription>
-                  Le volume de la carte s&apos;affichera après la construction.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
           )}
         </TabsContent>
         <TabsContent value="schema" className="min-h-64 flex-1">

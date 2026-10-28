@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
+from fastapi.responses import Response
 from fastapi.sse import EventSourceResponse, ServerSentEvent
 
 from nia_pcb.ato_project import AtoStore, WriteAto, WriteAtoFile
@@ -28,6 +29,7 @@ from nia_pcb.parts_store import (
     PartsView,
     make_parts_step,
 )
+from nia_pcb.preview import PreviewStore, PreviewView
 from nia_pcb.projects import CreateProject, Project, ProjectNotFound, ProjectStore
 from nia_pcb.schematic import SchematicStore
 from nia_pcb.settings import PublicSettings, SettingsStore, SettingsUpdate
@@ -51,11 +53,13 @@ def create_app(
     catalog=None,
     ato_builder=None,
     ato_fixer=None,
+    preview_builder=None,
 ) -> FastAPI:
     # Import tardif : enregistre les tables avant create_all.
     from nia_pcb import ato_fix as _ato_fix_module  # noqa: F401
     from nia_pcb import ato_project as _ato_module  # noqa: F401
     from nia_pcb import parts_store as _parts_store_module  # noqa: F401
+    from nia_pcb import preview as _preview_module  # noqa: F401
     from nia_pcb import schematic as _schematic_module  # noqa: F401
     from nia_pcb.ato_fix import LlmAtoFixer, make_ato_fix_step
     from nia_pcb.ato_project import (
@@ -64,12 +68,14 @@ def create_app(
         projects_base_dir,
     )
     from nia_pcb.parts_catalog import CachedCatalog, JlcsearchCatalog
+    from nia_pcb.preview import PreviewStore, make_preview_step
     from nia_pcb.schematic import SchematicStore, make_schema_validation_step
 
     store = ProjectStore(database_path)
     specifications = SpecificationStore(store.engine)
     parts = PartsStore(store.engine)
     ato = AtoStore(store.engine, projects_base_dir(database_path))
+    preview = PreviewStore(store.engine, projects_base_dir(database_path), ato)
     schematic = SchematicStore(store.engine)
     default_catalog = CachedCatalog(catalog or JlcsearchCatalog())
     fixer = ato_fixer
@@ -83,6 +89,7 @@ def create_app(
         "valider_schema": make_schema_validation_step(
             store, schematic, ato, ato_builder
         ),
+        "apercu": make_preview_step(preview, preview_builder),
     }
     if steps:
         registered.update(steps)
@@ -102,6 +109,7 @@ def create_app(
     app.state.parts = parts
     app.state.ato = ato
     app.state.schematic = schematic
+    app.state.preview = preview
     app.state.settings = SettingsStore(store.engine)
     app.state.costs = CostStore(store.engine)
     app.include_router(router)
@@ -143,6 +151,11 @@ def get_schematic(request: Request) -> SchematicStore:
     return request.app.state.schematic
 
 
+def get_preview(request: Request) -> PreviewStore:
+    preview: PreviewStore = request.app.state.preview
+    return preview
+
+
 StoreDep = Annotated[ProjectStore, Depends(get_store)]
 JobsDep = Annotated[JobRunner, Depends(get_jobs)]
 SpecificationsDep = Annotated[SpecificationStore, Depends(get_specifications)]
@@ -151,6 +164,7 @@ CostsDep = Annotated[CostStore, Depends(get_costs)]
 PartsDep = Annotated[PartsStore, Depends(get_parts)]
 AtoDep = Annotated[AtoStore, Depends(get_ato)]
 SchematicDep = Annotated[SchematicStore, Depends(get_schematic)]
+PreviewDep = Annotated[PreviewStore, Depends(get_preview)]
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -545,6 +559,43 @@ def validate_schema(
         ) from None
     except SchematicNotGreen as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.get("/{project_id}/apercu")
+def read_apercu(project_id: str, preview: PreviewDep) -> PreviewView:
+    try:
+        return preview.read(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.post("/{project_id}/apercu/generer", status_code=202)
+def generer_apercu(
+    project_id: str, jobs: JobsDep, store: StoreDep, preview: PreviewDep
+) -> Job:
+    try:
+        store.open(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    if "apercu" not in jobs.steps:
+        raise HTTPException(status_code=422, detail="Cette étape n'est pas disponible.")
+    try:
+        return jobs.launch(project_id, "apercu", {})
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.get("/{project_id}/apercu/modele")
+def read_apercu_modele(project_id: str, preview: PreviewDep) -> Response:
+    try:
+        contenu = preview.read_glb(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404, detail="Aucun modèle 3D pour ce projet."
+        ) from None
+    return Response(content=contenu, media_type="model/gltf-binary")
 
 
 def _exigences_json(body: PartsRequest) -> str:
