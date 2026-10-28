@@ -49,10 +49,13 @@ def create_app(
     model: LanguageModel | None = None,
     catalog=None,
     ato_builder=None,
+    ato_fixer=None,
 ) -> FastAPI:
     # Import tardif : enregistre les tables avant create_all.
+    from nia_pcb import ato_fix as _ato_fix_module  # noqa: F401
     from nia_pcb import ato_project as _ato_module  # noqa: F401
     from nia_pcb import parts_store as _parts_store_module  # noqa: F401
+    from nia_pcb.ato_fix import LlmAtoFixer, make_ato_fix_step
     from nia_pcb.ato_project import (
         AtoStore,
         make_ato_build_step,
@@ -65,10 +68,14 @@ def create_app(
     parts = PartsStore(store.engine)
     ato = AtoStore(store.engine, projects_base_dir(database_path))
     default_catalog = CachedCatalog(catalog or JlcsearchCatalog())
+    fixer = ato_fixer
+    if fixer is None and model is not None:
+        fixer = LlmAtoFixer(model)
     registered: dict[str, Callable[[JobContext], None]] = {
         "specification": make_specification_step(specifications, model),
         "pieces": make_parts_step(parts, default_catalog),
         "construire": make_ato_build_step(ato, ato_builder),
+        "corriger": make_ato_fix_step(ato, ato_builder, fixer, engine=store.engine),
     }
     if steps:
         registered.update(steps)
@@ -438,6 +445,26 @@ def build_ato(project_id: str, jobs: JobsDep, store: StoreDep) -> Job:
         raise HTTPException(status_code=422, detail="Cette étape n'est pas disponible.")
     try:
         return jobs.launch(project_id, "construire", {})
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+
+
+@router.post("/{project_id}/ato/corriger", status_code=202)
+def fix_ato(project_id: str, body: dict, jobs: JobsDep, store: StoreDep) -> Job:
+    try:
+        store.open(project_id)
+    except ProjectNotFound:
+        raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
+    if "corriger" not in jobs.steps:
+        raise HTTPException(status_code=422, detail="Cette étape n'est pas disponible.")
+    inputs: dict[str, str] = {}
+    if isinstance(body, dict):
+        for key in ("max_iterations", "mode", "allow_over_budget"):
+            value = body.get(key)
+            if value is not None:
+                inputs[key] = str(value)
+    try:
+        return jobs.launch(project_id, "corriger", inputs)
     except ProjectNotFound:
         raise HTTPException(status_code=404, detail="Ce projet n'existe pas.") from None
 
